@@ -32,20 +32,7 @@
     padding: 72px 20px 60px;
   }
 
-  .lamp { width: 40px; height: 40px; margin: 0 auto 20px; position: relative; }
-  .lamp::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--amber) 0%, transparent 70%);
-    filter: blur(5px);
-    animation: flicker 2.6s ease-in-out infinite;
-  }
-  @keyframes flicker {
-    0%, 100% { opacity: 0.55; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.12); }
-  }
+  .logo { width: 76px; height: 76px; margin: 0 auto 20px; display: block; border-radius: 18px; }
 
   h1 {
     font-size: 42px;
@@ -202,7 +189,7 @@
 </head>
 <body>
 
-  <div class="lamp"></div>
+  <img class="logo" src="icon.png" alt="Genie Reader">
   <h1>Genie Reader</h1>
   <p class="pitch">
     Paste an article, drop in a document, or type text — Genie Reader rewrites it
