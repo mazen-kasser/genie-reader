@@ -104,6 +104,28 @@
 
   /* --- Mockup of the actual app UI --- */
   .mock-wrap { width: 100%; max-width: 460px; }
+  .mock-window {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+  .mock-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 14px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .mock-dot { width: 11px; height: 11px; border-radius: 50%; }
+  .mock-dot-red { background: #ED6A5E; }
+  .mock-dot-yellow { background: #F4BF4F; }
+  .mock-dot-green { background: #61C454; }
+  .mock-window-content { padding: 26px 22px 22px; }
   .mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
   .mock-lamp {
     width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
@@ -198,31 +220,40 @@
   </div>
 
   <div class="mock-wrap">
-    <div class="mock-header">
-      <span class="mock-lamp"></span>
-      <div class="mock-name">Genie Reader</div>
-      <div class="mock-header-icons">
-        <div class="mock-icon">&#128337;</div>
-        <div class="mock-icon">&#128266;</div>
-        <div class="mock-icon">&#9788;</div>
+    <div class="mock-window">
+      <div class="mock-titlebar">
+        <span class="mock-dot mock-dot-red"></span>
+        <span class="mock-dot mock-dot-yellow"></span>
+        <span class="mock-dot mock-dot-green"></span>
+      </div>
+      <div class="mock-window-content">
+        <div class="mock-header">
+          <span class="mock-lamp"></span>
+          <div class="mock-name">Genie Reader</div>
+          <div class="mock-header-icons">
+            <div class="mock-icon">&#128337;</div>
+            <div class="mock-icon">&#128266;</div>
+            <div class="mock-icon">&#9788;</div>
+          </div>
+        </div>
+        <div class="mock-panel">
+          <div class="mock-tabs">
+            <div class="active">URL</div>
+            <div>Text</div>
+            <div>PDF</div>
+          </div>
+          <div class="mock-field-label">Article URL</div>
+          <div class="mock-input">https://example.com/article</div>
+          <div class="mock-modes">
+            <div class="mock-mode active">Verbatim</div>
+            <div class="mock-mode">Natural</div>
+            <div class="mock-mode">Summary</div>
+          </div>
+          <div class="mock-go">Read it</div>
+        </div>
+        <div class="mock-footer">Local · Private · Reads Anything Aloud</div>
       </div>
     </div>
-    <div class="mock-panel">
-      <div class="mock-tabs">
-        <div class="active">URL</div>
-        <div>Text</div>
-        <div>PDF</div>
-      </div>
-      <div class="mock-field-label">Article URL</div>
-      <div class="mock-input">https://example.com/article</div>
-      <div class="mock-modes">
-        <div class="mock-mode active">Verbatim</div>
-        <div class="mock-mode">Natural</div>
-        <div class="mock-mode">Summary</div>
-      </div>
-      <div class="mock-go">Read it</div>
-    </div>
-    <div class="mock-footer">Local · Private · Reads Anything Aloud</div>
   </div>
 
   <div class="features">
