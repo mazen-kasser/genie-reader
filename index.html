@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genie Reader — local, private text-to-speech for macOS</title>
 <meta name="description" content="Genie Reader turns articles, PDFs, and pasted text into natural-sounding spoken audio, entirely on your Mac. Free download for macOS.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxRTE5MTIiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iI0U3QTMzRSIgb3BhY2l0eT0iMC4zNSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0NSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiIgZm9udC1zaXplPSIzNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0U3QTMzRSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RzwvdGV4dD4KPC9zdmc+Cg==">
 <style>
   :root {
     --bg: #15120F;
@@ -70,6 +71,16 @@
     color: var(--text-muted);
     font-size: 17px;
     line-height: 1.55;
+    margin: 0 0 12px;
+  }
+
+  .joke {
+    max-width: 480px;
+    text-align: center;
+    color: var(--amber-dim);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.5;
     margin: 0 0 34px;
   }
 
@@ -103,12 +114,18 @@
 
   /* --- Mockup of the actual app UI --- */
   .mock-wrap { width: 100%; max-width: 460px; }
-  .mock-topbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: -14px; }
+  .mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .mock-lamp {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle, var(--amber) 0%, transparent 70%);
+  }
+  .mock-name { font-size: 15px; font-weight: 600; }
+  .mock-header-icons { display: flex; gap: 6px; margin-left: auto; }
   .mock-icon {
-    width: 30px; height: 30px; border-radius: 50%;
+    width: 28px; height: 28px; border-radius: 50%;
     border: 1px solid var(--line); background: var(--panel-2);
     display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted); font-size: 15px;
+    color: var(--text-muted); font-size: 13px;
   }
   .mock-panel {
     background: var(--panel);
@@ -116,22 +133,24 @@
     border-radius: 14px;
     padding: 22px;
   }
-  .mock-nav { display: flex; gap: 6px; margin-bottom: 16px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
-  .mock-nav div { flex: 1; text-align: center; padding: 7px 0; border-radius: 7px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.03em; color: var(--text-muted); }
-  .mock-nav div.active { background: var(--amber); color: #211603; font-weight: 600; }
   .mock-tabs { display: flex; gap: 5px; margin-bottom: 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
   .mock-tabs div { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted); }
   .mock-tabs div.active { background: var(--amber); color: #211603; font-weight: 600; }
   .mock-field-label { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
   .mock-input { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
   .mock-modes { display: flex; gap: 8px; margin-bottom: 16px; }
-  .mock-mode { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 9px 6px; text-align: center; }
+  .mock-mode { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px; text-align: center; font-family: ui-monospace, monospace; font-size: 11px; }
   .mock-mode.active { border-color: var(--amber); background: rgba(231,163,62,0.08); }
-  .mock-mode-name { font-family: ui-monospace, monospace; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
-  .mock-mode-desc { font-size: 9.5px; color: var(--text-muted); }
-  .mock-voice { text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
-  .mock-voice b { color: var(--text); }
   .mock-go { background: var(--amber); color: #211603; text-align: center; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; }
+  .mock-footer {
+    margin-top: 14px;
+    font-family: ui-monospace, monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+  }
 
   .features {
     width: 100%;
@@ -165,6 +184,8 @@
     color: var(--text-muted);
     text-align: center;
   }
+  footer a { color: var(--text-muted); }
+  footer a:hover { color: var(--amber); }
 </style>
 </head>
 <body>
@@ -174,9 +195,10 @@
   <p class="tagline">Local · Private · Reads Anything Aloud</p>
   <p class="pitch">
     Paste an article, drop in a PDF, or type text — Genie Reader rewrites it for
-    speech and reads it back in one of 28 voices. Everything runs on your Mac;
+    speech and reads it back in one of 8 voices. Everything runs on your Mac;
     nothing is sent to the cloud.
   </p>
+  <p class="joke">Unlimited wishes — limited only by your RAM.</p>
 
   <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-1.0.0.dmg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -187,39 +209,31 @@
   </div>
 
   <div class="mock-wrap">
-    <div class="mock-topbar">
-      <div class="mock-icon">&#128266;</div>
-      <div class="mock-icon">&#9788;</div>
+    <div class="mock-header">
+      <span class="mock-lamp"></span>
+      <div class="mock-name">Genie Reader</div>
+      <div class="mock-header-icons">
+        <div class="mock-icon">&#128337;</div>
+        <div class="mock-icon">&#128266;</div>
+        <div class="mock-icon">&#9788;</div>
+      </div>
     </div>
     <div class="mock-panel">
-      <div class="mock-nav">
-        <div class="active">New reading</div>
-        <div>History</div>
-      </div>
       <div class="mock-tabs">
         <div class="active">URL</div>
-        <div>Paste text</div>
+        <div>Text</div>
         <div>PDF</div>
       </div>
       <div class="mock-field-label">Article URL</div>
       <div class="mock-input">https://example.com/article</div>
       <div class="mock-modes">
-        <div class="mock-mode active">
-          <div class="mock-mode-name">Verbatim</div>
-          <div class="mock-mode-desc">Word for word</div>
-        </div>
-        <div class="mock-mode">
-          <div class="mock-mode-name">Natural</div>
-          <div class="mock-mode-desc">Smoothed for speech</div>
-        </div>
-        <div class="mock-mode">
-          <div class="mock-mode-name">Summary</div>
-          <div class="mock-mode-desc">Condensed</div>
-        </div>
+        <div class="mock-mode active">Verbatim</div>
+        <div class="mock-mode">Natural</div>
+        <div class="mock-mode">Summary</div>
       </div>
-      <div class="mock-voice">Voice: <b>Heart — American · Female</b></div>
-      <div class="mock-go">Read it to me</div>
+      <div class="mock-go">Read it</div>
     </div>
+    <div class="mock-footer">Local · Private · Reads Anything Aloud</div>
   </div>
 
   <div class="features">
@@ -232,7 +246,7 @@
       <div class="feature-desc">Verbatim, a natural podcast-style rewrite, or a condensed summary — your call each time.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">28 voices</div>
+      <div class="feature-title">8 voices</div>
       <div class="feature-desc">American and British accents, female and male, each previewable before you commit.</div>
     </div>
     <div class="feature">
@@ -251,15 +265,15 @@
 
   <div class="install-note">
     <b>Installing:</b> open the downloaded <code>.dmg</code> and drag Genie Reader
-    into your Applications folder. The app is signed and notarized by Apple,
-    so it opens normally — no security warnings. Genie Reader also expects
+    into your Applications folder. Genie Reader also expects
     <a href="https://ollama.com" style="color:var(--text)">Ollama</a> for the
     article rewriting step; it'll offer to install this automatically on
     first run if it's missing.
   </div>
 
   <footer>
-    Signed &amp; notarized by iProgram Pty Ltd.
+    Genie Reader v1.0.0 · Signed &amp; notarized by iProgram Pty Ltd ·
+    <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a>
   </footer>
 
 </body>
