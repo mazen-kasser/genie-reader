@@ -53,21 +53,13 @@
 
   .pitch {
     max-width: 480px;
+    min-height: 54px;
     text-align: center;
     color: var(--text-muted);
     font-size: 17px;
     line-height: 1.55;
-    margin: 0 0 12px;
-  }
-
-  .joke {
-    max-width: 480px;
-    text-align: center;
-    color: var(--amber-dim);
-    font-size: 14px;
-    font-style: italic;
-    line-height: 1.5;
-    margin: 0 0 34px;
+    margin: 0 auto 34px;
+    transition: opacity 0.25s ease;
   }
 
   .type-cursor {
@@ -214,10 +206,8 @@
 
   <img class="logo" src="icon.png" alt="Genie Reader">
   <h1 class="sr-only">Genie Reader</h1>
-  <p class="pitch" id="pitch-text"></p>
-  <noscript><p class="pitch">Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 8 voices. Everything runs on your Mac; nothing is sent to the cloud.</p></noscript>
-  <p class="joke" id="joke-text"></p>
-  <noscript><p class="joke">Unlimited wishes — limited only by your RAM.</p></noscript>
+  <p class="pitch" id="type-text"></p>
+  <noscript><p class="pitch">Genie Reader rewrites articles, documents, and pasted text for speech and reads them back in one of 8 voices. Everything runs on your Mac; nothing is sent to the cloud.</p></noscript>
 
   <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-1.0.0.dmg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -305,8 +295,14 @@
   </footer>
 
 <script>
-  var PITCH_TEXT = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 8 voices. Everything runs on your Mac; nothing is sent to the cloud.";
-  var JOKE_TEXT = "Unlimited wishes — limited only by your RAM.";
+  var LINES = [
+    "Paste an article, drop in a document, or type text",
+    "Genie Reader rewrites it for speech and reads it back in one of 8 voices.",
+    "Everything runs on your Mac; nothing is sent to the cloud.",
+    "Unlimited wishes — limited only by your RAM."
+  ];
+  var TYPE_SPEED = 45;
+  var READ_PAUSE = 1100;
 
   function typeInto(el, text, speed, onDone) {
     var i = 0;
@@ -325,11 +321,26 @@
     })();
   }
 
-  var pitchEl = document.getElementById('pitch-text');
-  var jokeEl = document.getElementById('joke-text');
-  typeInto(pitchEl, PITCH_TEXT, 14, function () {
-    setTimeout(function () { typeInto(jokeEl, JOKE_TEXT, 14); }, 300);
-  });
+  function clearText(el, callback) {
+    el.style.opacity = '0';
+    setTimeout(function () {
+      el.textContent = '';
+      el.style.opacity = '1';
+      callback();
+    }, 260);
+  }
+
+  function runSequence(el, lines, index) {
+    typeInto(el, lines[index], TYPE_SPEED, function () {
+      var isLast = index === lines.length - 1;
+      if (isLast) return;
+      setTimeout(function () {
+        clearText(el, function () { runSequence(el, lines, index + 1); });
+      }, READ_PAUSE);
+    });
+  }
+
+  runSequence(document.getElementById('type-text'), LINES, 0);
 </script>
 
 </body>
