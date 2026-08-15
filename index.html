@@ -66,18 +66,17 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: #1d1815;
-    border: 1px solid var(--line);
-    color: var(--text);
+    background: var(--amber);
+    color: #211603;
     font-family: ui-serif, Georgia, serif;
     font-size: 17px;
     font-weight: 700;
     text-decoration: none;
     padding: 15px 30px;
     border-radius: 11px;
-    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    transition: filter 0.15s, transform 0.1s;
   }
-  .download-btn:hover { background: #262019; border-color: var(--amber-dim); }
+  .download-btn:hover { filter: brightness(1.08); }
   .download-btn:active { transform: scale(0.98); }
   .download-btn svg { width: 18px; height: 18px; }
 
