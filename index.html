@@ -32,7 +32,16 @@
     padding: 72px 20px 60px;
   }
 
-  .logo { width: 76px; height: 76px; margin: 0 auto 20px; display: block; border-radius: 18px; }
+  .logo { width: 148px; height: 148px; margin: 0 auto 28px; display: block; border-radius: 34px; }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
   h1 {
     font-size: 42px;
@@ -59,6 +68,20 @@
     font-style: italic;
     line-height: 1.5;
     margin: 0 0 34px;
+  }
+
+  .type-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    background: var(--amber);
+    vertical-align: text-bottom;
+    animation: cursor-blink 0.9s steps(1) infinite;
+  }
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
   }
 
   .download-btn {
@@ -190,13 +213,11 @@
 <body>
 
   <img class="logo" src="icon.png" alt="Genie Reader">
-  <h1>Genie Reader</h1>
-  <p class="pitch">
-    Paste an article, drop in a document, or type text — Genie Reader rewrites it
-    for speech and reads it back in one of 8 voices. Everything runs on your Mac;
-    nothing is sent to the cloud.
-  </p>
-  <p class="joke">Unlimited wishes — limited only by your RAM.</p>
+  <h1 class="sr-only">Genie Reader</h1>
+  <p class="pitch" id="pitch-text"></p>
+  <noscript><p class="pitch">Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 8 voices. Everything runs on your Mac; nothing is sent to the cloud.</p></noscript>
+  <p class="joke" id="joke-text"></p>
+  <noscript><p class="joke">Unlimited wishes — limited only by your RAM.</p></noscript>
 
   <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-1.0.0.dmg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -279,9 +300,37 @@
   </div>
 
   <footer>
-    Genie Reader v1.0.0 · Signed &amp; notarized by iProgram Pty Ltd ·
+    Genie Reader v1.0.0 ·
     <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a>
   </footer>
+
+<script>
+  var PITCH_TEXT = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 8 voices. Everything runs on your Mac; nothing is sent to the cloud.";
+  var JOKE_TEXT = "Unlimited wishes — limited only by your RAM.";
+
+  function typeInto(el, text, speed, onDone) {
+    var i = 0;
+    var cursor = document.createElement('span');
+    cursor.className = 'type-cursor';
+    el.appendChild(cursor);
+    (function step() {
+      if (i < text.length) {
+        cursor.insertAdjacentText('beforebegin', text.charAt(i));
+        i++;
+        setTimeout(step, speed);
+      } else {
+        cursor.remove();
+        if (onDone) onDone();
+      }
+    })();
+  }
+
+  var pitchEl = document.getElementById('pitch-text');
+  var jokeEl = document.getElementById('joke-text');
+  typeInto(pitchEl, PITCH_TEXT, 14, function () {
+    setTimeout(function () { typeInto(jokeEl, JOKE_TEXT, 14); }, 300);
+  });
+</script>
 
 </body>
 </html>
