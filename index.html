@@ -21,6 +21,8 @@
 
   * { box-sizing: border-box; }
 
+  html { background: var(--bg); }
+
   body {
     margin: 0;
     background: radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
@@ -38,6 +40,11 @@
     justify-content: center;
     gap: 3px;
     margin: 0 auto 36px;
+  }
+  @media (max-width: 480px) {
+    .wordmark { flex-direction: column; gap: 8px; }
+    .wordmark-icon { width: 34px; height: 34px; }
+    .wordmark-text { font-size: 38px; }
   }
   .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; }
   .wordmark-icon polygon { fill: var(--bg); }
@@ -153,14 +160,17 @@
     cursor: pointer;
   }
   .mock-play-btn svg { width: 14px; height: 14px; }
-  .mock-seek { flex: 1; accent-color: var(--amber); cursor: pointer; }
+  .mock-seek { flex: 1; min-width: 0; accent-color: var(--amber); cursor: pointer; }
   .mock-time { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); min-width: 66px; text-align: right; font-variant-numeric: tabular-nums; }
   .mock-speed-btn {
+    flex-shrink: 0;
     font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted);
     border: 1px solid var(--line); background: var(--panel-2);
     border-radius: 7px; padding: 6px 8px; cursor: pointer;
   }
-  .mock-speed-btn:hover { color: var(--text); border-color: var(--amber-dim); }
+  @media (hover: hover) {
+    .mock-speed-btn:hover { color: var(--text); border-color: var(--amber-dim); }
+  }
 
   .mock-script-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .mock-script-actions { display: flex; gap: 5px; }
@@ -171,7 +181,14 @@
     color: var(--text-muted); font-family: ui-monospace, monospace; font-size: 11px;
     cursor: pointer;
   }
-  .mock-script-btn:hover { color: var(--amber); border-color: var(--amber-dim); }
+  @media (hover: hover) {
+    .mock-script-btn:hover { color: var(--amber); border-color: var(--amber-dim); }
+  }
+  @media (max-width: 480px) {
+    .mock-player { gap: 6px; }
+    .mock-time { min-width: 56px; font-size: 10px; }
+    .mock-speed-btn { padding: 6px 6px; font-size: 10px; }
+  }
   .mock-script-btn svg { width: 11px; height: 11px; }
   .mock-script-text {
     --script-fs: 18px;
@@ -243,7 +260,10 @@
     flex-direction: column;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .feature:hover { border-color: var(--amber-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  .feature.tap-open { border-color: var(--amber-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  @media (hover: hover) {
+    .feature:hover { border-color: var(--amber-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  }
   .feature-head { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
   .feature-icon {
     flex-shrink: 0;
@@ -269,7 +289,10 @@
     text-align: center;
     transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
   }
-  .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
+  .feature.tap-open .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
+  @media (hover: hover) {
+    .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
+  }
 
   .divider { width: 120px; height: 1px; background: var(--line); margin: 48px auto; }
 
@@ -579,6 +602,17 @@
       applyFontSize();
     });
   })();
+</script>
+
+<script>
+  // Touch devices don't have real hover, and iOS only fires :hover after a
+  // long-press — so the feature cards also open on a plain tap here, via a
+  // class the (hover: hover) media query above leaves alone on desktop.
+  document.querySelectorAll('.feature').forEach(function (card) {
+    card.addEventListener('click', function () {
+      card.classList.toggle('tap-open');
+    });
+  });
 </script>
 
 </body>
