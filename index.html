@@ -39,11 +39,11 @@
     gap: 3px;
     margin: 0 auto 28px;
   }
-  .wordmark-icon { width: 30px; height: 30px; flex-shrink: 0; display: block; }
+  .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; }
   .wordmark-icon polygon { fill: var(--bg); }
   .wordmark-icon { filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
   .wordmark-text {
-    font-size: 40px;
+    font-size: 52px;
     font-weight: 400;
     letter-spacing: 0.01em;
     margin: 0;
@@ -173,11 +173,44 @@
     margin-top: 70px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    align-items: start;
     gap: 22px;
   }
-  .feature { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-  .feature-title { font-size: 15.5px; font-weight: 600; margin-bottom: 6px; }
-  .feature-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .feature {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .feature:hover { border-color: var(--amber-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  .feature-head { display: flex; align-items: center; gap: 12px; }
+  .feature-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--panel-2);
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .feature-icon svg { width: 18px; height: 18px; }
+  .feature-title { font-size: 14.5px; font-weight: 600; }
+  .feature-desc {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+  }
+  .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
 
   .divider { width: 120px; height: 1px; background: var(--line); margin: 56px auto 0; }
 
@@ -215,7 +248,7 @@
     Download for macOS
   </a>
   <div class="download-meta">
-    Available FREE on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
+    Available <b>FREE</b> on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
   </div>
 
   <div class="mock-wrap">
@@ -272,27 +305,57 @@
 
   <div class="features">
     <div class="feature">
-      <div class="feature-title">Any input</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13H6V3Z"/><path d="M14 3v5h5"/></svg>
+        </span>
+        <div class="feature-title">Any input</div>
+      </div>
       <div class="feature-desc">A URL, pasted text, or a document — PDF or any Office document.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">Three reading styles</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+        </span>
+        <div class="feature-title">3 reading styles</div>
+      </div>
       <div class="feature-desc">Original wording, a natural spoken rewrite, or a condensed summary.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">4 voices</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 11V9"/><path d="M12 12V8"/><path d="M16 11V9"/></svg>
+        </span>
+        <div class="feature-title">4 voices</div>
+      </div>
       <div class="feature-desc">American and British accents, female and male.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">100% local</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <div class="feature-title">100% local</div>
+      </div>
       <div class="feature-desc">Article rewriting and text-to-speech both run on-device via Ollama and Kokoro — nothing leaves your Mac.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">Reading history</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-1.5-1.4-4-2-7-2v13c3 0 5.5.6 7 2 1.5-1.4 4-2 7-2V5c-3 0-5.5.6-7 2Z"/><path d="M12 7v13"/></svg>
+        </span>
+        <div class="feature-title">Reading history</div>
+      </div>
       <div class="feature-desc">Every reading is saved locally with its audio and script, ready to replay or download offline.</div>
     </div>
     <div class="feature">
-      <div class="feature-title">Light &amp; dark</div>
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </span>
+        <div class="feature-title">Light &amp; dark</div>
+      </div>
       <div class="feature-desc">Matches your system appearance, with a one-click toggle.</div>
     </div>
   </div>
