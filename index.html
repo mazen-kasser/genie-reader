@@ -244,19 +244,19 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .feature:hover { border-color: var(--amber-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-  .feature-head { display: flex; align-items: center; gap: 12px; }
+  .feature-head { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
   .feature-icon {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
     background: var(--panel-2);
     color: var(--amber);
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .feature-icon svg { width: 18px; height: 18px; }
+  .feature-icon svg { width: 24px; height: 24px; }
   .feature-title { font-size: 14.5px; font-weight: 600; }
   .feature-desc {
     max-height: 0;
@@ -266,6 +266,7 @@
     font-size: 13px;
     color: var(--text-muted);
     line-height: 1.5;
+    text-align: center;
     transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
   }
   .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
@@ -396,7 +397,7 @@
         <span class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 11V9"/><path d="M12 12V8"/><path d="M16 11V9"/></svg>
         </span>
-        <div class="feature-title">4 voices</div>
+        <div class="feature-title">4 natural voices</div>
       </div>
       <div class="feature-desc">American and British accents, female and male.</div>
     </div>
@@ -405,7 +406,7 @@
         <span class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>
         </span>
-        <div class="feature-title">100% local</div>
+        <div class="feature-title">100% local &amp; private</div>
       </div>
       <div class="feature-desc">Article rewriting and text-to-speech both run on-device via Ollama and Kokoro — nothing leaves your Mac.</div>
     </div>
