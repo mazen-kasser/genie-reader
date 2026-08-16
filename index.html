@@ -37,7 +37,7 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    margin: 0 auto 28px;
+    margin: 0 auto 36px;
   }
   .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; }
   .wordmark-icon polygon { fill: var(--bg); }
@@ -51,21 +51,11 @@
     text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 0 rgba(0,0,0,0.4);
   }
 
-  .pitch {
-    max-width: 480px;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 19px;
-    line-height: 1.55;
-    margin: 0 auto 34px;
-  }
-  .pitch .word { border-radius: 3px; padding: 0 1px; transition: color 0.1s, background 0.1s; }
-  .pitch .word.active { color: var(--text); background: rgba(232,181,134,0.28); }
-
   .download-btn {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    margin-top: 56px;
     background: #1d1815;
     border: 1px solid var(--line);
     color: var(--text);
@@ -82,7 +72,7 @@
   .download-btn svg { width: 18px; height: 18px; }
 
   .download-meta {
-    margin: 12px 0 56px;
+    margin: 12px 0 0;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 11.5px;
     letter-spacing: 0.03em;
@@ -92,14 +82,13 @@
   .download-meta a { color: var(--text-muted); }
 
   /* --- Mockup of the actual app UI --- */
-  .mock-wrap { width: 100%; max-width: 460px; }
+  .mock-wrap { width: 100%; max-width: 620px; position: relative; }
   .mock-window {
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 12px;
     box-shadow: 0 30px 70px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
     overflow: hidden;
-    pointer-events: none;
     user-select: none;
   }
   .mock-titlebar {
@@ -115,33 +104,6 @@
   .mock-dot-yellow { background: #F4BF4F; }
   .mock-dot-green { background: #61C454; }
   .mock-window-content { padding: 26px 22px 22px; }
-  .mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .mock-header-icons { display: flex; gap: 6px; margin-left: auto; }
-  .mock-icon {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 1px solid var(--line); background: var(--panel-2);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted);
-  }
-  .mock-icon svg { width: 13px; height: 13px; }
-  .mock-g-watermark {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    flex-shrink: 0;
-  }
-  .mock-g-watermark svg { width: 11px; height: 11px; display: block; }
-  .mock-g-watermark polygon { fill: var(--bg); }
-  .mock-g-watermark svg {
-    filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4));
-  }
-  .mock-g-watermark .mock-wordmark-text {
-    font-family: ui-serif, Georgia, serif;
-    font-weight: 400;
-    font-size: 14px;
-    color: var(--bg);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 0 rgba(0,0,0,0.4);
-  }
   .mock-panel {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -156,7 +118,104 @@
   .mock-modes { display: flex; gap: 8px; margin-bottom: 16px; }
   .mock-mode { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px; text-align: center; font-family: ui-monospace, monospace; font-size: 11px; }
   .mock-mode.active { border-color: var(--amber); background: rgba(232,181,134,0.08); }
-  .mock-go { background: var(--amber); color: #211603; text-align: center; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; }
+  .mock-go { background: var(--amber); color: #211603; text-align: center; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; cursor: default; }
+  .mock-done { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+
+  .mock-field-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .mock-wand-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--panel-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+  }
+  .mock-wand-btn svg { width: 12px; height: 12px; }
+  .mock-textarea {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    min-height: 70px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-bottom: 16px;
+  }
+
+  .mock-divider-line { height: 1px; background: var(--line); margin: 18px 0; }
+
+  .mock-player { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; position: relative; }
+  .mock-play-btn {
+    flex-shrink: 0;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--amber); color: #211603;
+    border: none; display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .mock-play-btn svg { width: 14px; height: 14px; }
+  .mock-seek { flex: 1; accent-color: var(--amber); cursor: pointer; }
+  .mock-time { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); min-width: 66px; text-align: right; font-variant-numeric: tabular-nums; }
+  .mock-speed-btn {
+    font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted);
+    border: 1px solid var(--line); background: var(--panel-2);
+    border-radius: 7px; padding: 6px 8px; cursor: pointer;
+  }
+  .mock-speed-btn:hover { color: var(--text); border-color: var(--amber-dim); }
+
+  .mock-script-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .mock-script-actions { display: flex; gap: 5px; }
+  .mock-script-btn {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--panel-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-family: ui-monospace, monospace; font-size: 11px;
+    cursor: pointer;
+  }
+  .mock-script-btn:hover { color: var(--amber); border-color: var(--amber-dim); }
+  .mock-script-btn svg { width: 11px; height: 11px; }
+  .mock-script-text {
+    --script-fs: 18px;
+    font-family: ui-serif, Georgia, serif;
+    font-size: var(--script-fs);
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .script-word { transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease; border-radius: 3px; }
+  .script-word.active { background: var(--amber); color: #211603; box-shadow: 3px 0 0 var(--amber), -3px 0 0 var(--amber); }
+
+  .demo-script-wrap {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity 0.35s ease;
+  }
+  .demo-script-wrap.revealed { max-height: 500px; opacity: 1; }
+
+  .try-me-badge {
+    position: absolute;
+    left: 0;
+    top: -42px;
+    background: #A8B4F0;
+    color: #1D2250;
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 8px 16px;
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: try-me-bounce 1.8s ease-in-out infinite;
+    cursor: pointer;
+    transition: opacity 0.25s ease;
+  }
+  .try-me-badge.hidden { opacity: 0; pointer-events: none; }
+  @keyframes try-me-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { .try-me-badge { animation: none; } }
+
   .mock-footer {
     margin-top: 14px;
     font-family: ui-monospace, monospace;
@@ -170,7 +229,6 @@
   .features {
     width: 100%;
     max-width: 720px;
-    margin-top: 70px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     align-items: start;
@@ -212,11 +270,11 @@
   }
   .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
 
-  .divider { width: 120px; height: 1px; background: var(--line); margin: 56px auto 0; }
+  .divider { width: 120px; height: 1px; background: var(--line); margin: 48px auto; }
 
   .install-note {
     max-width: 480px;
-    margin: 24px auto 0;
+    margin: 0 auto;
     text-align: center;
     font-size: 13px;
     color: var(--text-muted);
@@ -241,15 +299,6 @@
     <svg class="wordmark-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="22,2 22,5 20,9 16,13 11,17 8,20 4,23 1,23 3,20 5,17 9,13 13,9 18,5"/><polygon points="22,14 22,23 11,23"/></svg>
     <h1 class="wordmark-text">Genie Reader</h1>
   </div>
-  <p class="pitch" id="type-text">Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your Mac; nothing is sent to the cloud. Unlimited wishes — limited only by your RAM.</p>
-
-  <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-1.1.0.dmg">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-    Download for macOS
-  </a>
-  <div class="download-meta">
-    Available <b>FREE</b> on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
-  </div>
 
   <div class="mock-wrap">
     <div class="mock-window">
@@ -259,49 +308,69 @@
         <span class="mock-dot mock-dot-green"></span>
       </div>
       <div class="mock-window-content">
-        <div class="mock-header">
-          <span class="mock-g-watermark">
-            <svg viewBox="0 0 24 24"><polygon points="22,2 22,5 20,9 16,13 11,17 8,20 4,23 1,23 3,20 5,17 9,13 13,9 18,5"/><polygon points="22,14 22,23 11,23"/></svg>
-            <span class="mock-wordmark-text">Genie Reader</span>
-          </span>
-          <div class="mock-header-icons">
-            <div class="mock-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 7c-1.5-1.4-4-2-7-2v13c3 0 5.5.6 7 2 1.5-1.4 4-2 7-2V5c-3 0-5.5.6-7 2Z"/>
-                <path d="M12 7v13"/>
-              </svg>
-            </div>
-            <div class="mock-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 11V9"/><path d="M12 12V8"/><path d="M16 11V9"/>
-              </svg>
-            </div>
-            <div class="mock-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
-              </svg>
-            </div>
-          </div>
-        </div>
         <div class="mock-panel">
           <div class="mock-tabs">
-            <div class="active">URL</div>
-            <div>Text</div>
+            <div>URL</div>
+            <div class="active">Text</div>
             <div>Document</div>
           </div>
-          <div class="mock-field-label">Article URL</div>
-          <div class="mock-input">https://example.com/article</div>
+          <div class="mock-field-row">
+            <div class="mock-field-label">Article Text</div>
+            <div class="mock-wand-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3Z"/><path d="M18 13l.6 1.8 1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6.6-1.8Z"/></svg>
+            </div>
+          </div>
+          <div class="mock-textarea">Paste the article or newsletter text here…</div>
           <div class="mock-modes">
             <div class="mock-mode active">Original</div>
             <div class="mock-mode">Natural</div>
             <div class="mock-mode">Summary</div>
           </div>
           <div class="mock-go">Read</div>
+          <div class="mock-done">Done.</div>
+
+          <div class="mock-divider-line"></div>
+
+          <div class="mock-player">
+            <button class="try-me-badge" id="try-me-badge" type="button">Try me</button>
+            <button class="mock-play-btn" id="demo-play-btn" type="button" aria-label="Play demo reading">
+              <svg id="demo-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>
+            </button>
+            <input class="mock-seek" id="demo-seek" type="range" min="0" max="1000" value="0">
+            <span class="mock-time" id="demo-time">0:00 / 0:00</span>
+            <button class="mock-speed-btn" id="demo-speed-btn" type="button">1x</button>
+          </div>
+
+          <div class="demo-script-wrap" id="demo-script-wrap">
+            <div class="mock-script-head">
+              <div class="mock-field-label" style="margin-bottom:0;">Script</div>
+              <div class="mock-script-actions">
+                <button class="mock-script-btn" id="demo-copy-btn" type="button" aria-label="Copy script">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                </button>
+                <button class="mock-script-btn" id="demo-font-minus" type="button" aria-label="Smaller text">A−</button>
+                <button class="mock-script-btn" id="demo-font-plus" type="button" aria-label="Larger text">A+</button>
+              </div>
+            </div>
+            <div class="mock-script-text" id="demo-script-text"></div>
+          </div>
         </div>
         <div class="mock-footer">Local · Private · Reads Anything Aloud</div>
       </div>
     </div>
   </div>
+
+  <audio id="demo-audio" src="demo-reading.wav" preload="metadata"></audio>
+
+  <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-1.1.0.dmg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+    Download for macOS
+  </a>
+  <div class="download-meta">
+    Available <b>FREE</b> on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
+  </div>
+
+  <div class="divider"></div>
 
   <div class="features">
     <div class="feature">
@@ -375,35 +444,140 @@
   </footer>
 
 <script>
-  // Same word-by-word "read-along" highlight the app itself uses during
-  // playback (see .word / .word.active in the app's own templates/index.html),
-  // paced like real 1x speech: total time budgeted at a natural speaking
-  // rate, then split per word proportional to character length — the same
-  // approach the app itself uses to derive word timing from segment audio
-  // duration (wDur = duration * word.length / totalChars).
-  var WORDS_PER_MINUTE = 155;
+  // The "Try me" demo player: a real recording made with the app itself,
+  // reading its own pitch text. Kokoro generates audio sentence-by-sentence
+  // and the app derives word highlight timing from each sentence's real
+  // duration (see speak() in app.py) — we don't have that per-sentence
+  // breakdown for a static page, so this approximates it: weight each word
+  // by its letter count plus extra weight for trailing punctuation (commas
+  // pause briefly, sentence-enders pause longer), then distribute the
+  // recording's total duration proportionally. Close enough to track the
+  // real audio convincingly without shipping a separate timing file.
+  (function () {
+    var scriptTextRaw = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your Mac; nothing is sent to the cloud. Unlimited wishes — limited only by your RAM.";
+    var audio = document.getElementById('demo-audio');
+    var playBtn = document.getElementById('demo-play-btn');
+    var playIcon = document.getElementById('demo-play-icon');
+    var seek = document.getElementById('demo-seek');
+    var timeEl = document.getElementById('demo-time');
+    var speedBtn = document.getElementById('demo-speed-btn');
+    var copyBtn = document.getElementById('demo-copy-btn');
+    var fontMinus = document.getElementById('demo-font-minus');
+    var fontPlus = document.getElementById('demo-font-plus');
+    var scriptEl = document.getElementById('demo-script-text');
+    var scriptWrap = document.getElementById('demo-script-wrap');
+    var tryMeBadge = document.getElementById('try-me-badge');
 
-  var el = document.getElementById('type-text');
-  var words = el.textContent.trim().split(/\s+/);
-  el.innerHTML = words.map(function (w, i) {
-    return '<span class="word" data-wi="' + i + '">' + w + '</span>';
-  }).join(' ');
+    var ICON_PLAY = '<path d="M8 5v14l11-7Z"/>';
+    var ICON_PAUSE = '<path d="M7 5h4v14H7Z"/><path d="M13 5h4v14h-4Z"/>';
 
-  var spans = el.querySelectorAll('.word');
-  var totalChars = words.reduce(function (a, w) { return a + w.length; }, 0);
-  var totalDuration = (words.length / WORDS_PER_MINUTE) * 60000;
-  var durations = words.map(function (w) { return totalDuration * (w.length / totalChars); });
-  var idx = 0;
+    var words = scriptTextRaw.split(/\s+/);
+    var weights = words.map(function (w) {
+      var letters = w.replace(/[^a-zA-Z0-9]/g, '').length;
+      var weight = letters + 2;
+      if (/[.!?]$/.test(w)) weight += 6;
+      else if (/[,;:—]$/.test(w)) weight += 3;
+      return weight;
+    });
+    var totalWeight = weights.reduce(function (a, b) { return a + b; }, 0);
+    var cum = 0;
+    var boundaries = weights.map(function (w) {
+      cum += w;
+      return cum / totalWeight;
+    });
 
-  function sweep() {
-    if (idx > 0) spans[idx - 1].classList.remove('active');
-    spans[idx].classList.add('active');
-    var delay = durations[idx];
-    idx++;
-    // Stops after the last word — it stays highlighted, no loop, no repeat.
-    if (idx < spans.length) setTimeout(sweep, delay);
-  }
-  sweep();
+    scriptEl.innerHTML = words.map(function (w, i) {
+      return '<span class="script-word" data-i="' + i + '">' + w + '</span>';
+    }).join(' ');
+    var wordSpans = scriptEl.querySelectorAll('.script-word');
+
+    function fmtTime(s) {
+      if (!isFinite(s)) return '0:00';
+      var m = Math.floor(s / 60);
+      var sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    function updateTime() {
+      var dur = audio.duration || 0;
+      timeEl.textContent = fmtTime(audio.currentTime) + ' / ' + fmtTime(dur);
+    }
+
+    audio.addEventListener('loadedmetadata', updateTime);
+
+    var activeIdx = -1;
+    audio.addEventListener('timeupdate', function () {
+      updateTime();
+      var dur = audio.duration || 0;
+      if (dur > 0) seek.value = String(Math.round((audio.currentTime / dur) * 1000));
+      var frac = dur > 0 ? audio.currentTime / dur : 0;
+      var newIdx = 0;
+      while (newIdx < boundaries.length - 1 && boundaries[newIdx] < frac) newIdx++;
+      if (newIdx !== activeIdx) {
+        if (activeIdx >= 0) wordSpans[activeIdx].classList.remove('active');
+        wordSpans[newIdx].classList.add('active');
+        activeIdx = newIdx;
+      }
+    });
+
+    audio.addEventListener('ended', function () {
+      playIcon.innerHTML = ICON_PLAY;
+      if (activeIdx >= 0) wordSpans[activeIdx].classList.remove('active');
+      activeIdx = -1;
+      seek.value = '0';
+    });
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play();
+        playIcon.innerHTML = ICON_PAUSE;
+        tryMeBadge.classList.add('hidden');
+        scriptWrap.classList.add('revealed');
+      } else {
+        audio.pause();
+        playIcon.innerHTML = ICON_PLAY;
+      }
+    }
+    playBtn.addEventListener('click', togglePlay);
+    tryMeBadge.addEventListener('click', togglePlay);
+
+    seek.addEventListener('input', function () {
+      var dur = audio.duration || 0;
+      if (dur > 0) audio.currentTime = (Number(seek.value) / 1000) * dur;
+    });
+
+    var speeds = [1, 1.25, 1.5, 0.75];
+    var speedIdx = 0;
+    speedBtn.addEventListener('click', function () {
+      speedIdx = (speedIdx + 1) % speeds.length;
+      audio.playbackRate = speeds[speedIdx];
+      speedBtn.textContent = speeds[speedIdx] + 'x';
+    });
+
+    copyBtn.addEventListener('click', function () {
+      navigator.clipboard.writeText(scriptTextRaw).then(function () {
+        copyBtn.style.color = 'var(--amber)';
+        copyBtn.style.borderColor = 'var(--amber-dim)';
+        setTimeout(function () {
+          copyBtn.style.color = '';
+          copyBtn.style.borderColor = '';
+        }, 1200);
+      });
+    });
+
+    var fontSize = 18;
+    function applyFontSize() {
+      scriptEl.style.setProperty('--script-fs', fontSize + 'px');
+    }
+    fontMinus.addEventListener('click', function () {
+      fontSize = Math.max(16, fontSize - 2);
+      applyFontSize();
+    });
+    fontPlus.addEventListener('click', function () {
+      fontSize = Math.min(40, fontSize + 2);
+      applyFontSize();
+    });
+  })();
 </script>
 
 </body>
