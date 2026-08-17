@@ -119,14 +119,22 @@
   }
   .mock-tabs { display: flex; gap: 5px; margin-bottom: 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
   .mock-tabs div { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted); }
-  .mock-tabs div.active { background: var(--amber); color: #211603; font-weight: 600; }
+  .mock-tabs div.active { background: var(--text-muted); color: var(--panel-2); font-weight: 600; }
   .mock-field-label { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
   .mock-input { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
   .mock-modes { display: flex; gap: 8px; margin-bottom: 16px; }
   .mock-mode { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px; text-align: center; font-family: ui-monospace, monospace; font-size: 11px; }
   .mock-mode.active { border-color: var(--amber); background: rgba(232,181,134,0.08); }
-  .mock-go { background: var(--amber); color: #211603; text-align: center; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; cursor: default; }
-  .mock-done { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+  .mock-go-wrap { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .mock-go {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--amber); color: #211603;
+    border-radius: 10px; padding: 11px 24px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.03em; text-transform: uppercase;
+    cursor: default;
+  }
+  .mock-go svg { width: 14px; height: 14px; }
 
   .mock-field-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
   .mock-wand-btn {
@@ -350,8 +358,9 @@
             <div class="mock-mode">Natural</div>
             <div class="mock-mode">Summary</div>
           </div>
-          <div class="mock-go">Read</div>
-          <div class="mock-done">Done.</div>
+          <div class="mock-go-wrap">
+            <div class="mock-go">GO <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg></div>
+          </div>
 
           <div class="mock-divider-line"></div>
 
@@ -409,29 +418,20 @@
     <div class="feature">
       <div class="feature-head">
         <span class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
-        </span>
-        <div class="feature-title">3 reading styles</div>
-      </div>
-      <div class="feature-desc">Original wording, a natural spoken rewrite, or a condensed summary.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-head">
-        <span class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 11V9"/><path d="M12 12V8"/><path d="M16 11V9"/></svg>
-        </span>
-        <div class="feature-title">4 natural voices</div>
-      </div>
-      <div class="feature-desc">American and British accents, female and male.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-head">
-        <span class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>
         </span>
         <div class="feature-title">100% local &amp; private</div>
       </div>
-      <div class="feature-desc">Article rewriting and text-to-speech both run on-device via Ollama and Kokoro — nothing leaves your Mac.</div>
+      <div class="feature-desc">Text-to-speech runs on-device via Kokoro — nothing leaves your Mac.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+        </span>
+        <div class="feature-title">3 reading styles</div>
+      </div>
+      <div class="feature-desc">Word for word, also the pro version comes with a natural spoken rewrite, and a condensed summary.</div>
     </div>
     <div class="feature">
       <div class="feature-head">
@@ -441,6 +441,15 @@
         <div class="feature-title">Reading history</div>
       </div>
       <div class="feature-desc">Every reading is saved locally with its audio and script, ready to replay or download offline.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-head">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 11V9"/><path d="M12 12V8"/><path d="M16 11V9"/></svg>
+        </span>
+        <div class="feature-title">4 natural voices</div>
+      </div>
+      <div class="feature-desc">American and British accents, female and male.</div>
     </div>
     <div class="feature">
       <div class="feature-head">
