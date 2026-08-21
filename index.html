@@ -5,7 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genie Reader — local, private text-to-speech for macOS</title>
 <meta name="description" content="Genie Reader turns articles, documents, and pasted text into natural-sounding spoken audio, entirely on your Mac. Free download for macOS.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMyMjFFMkMiLz48cG9seWdvbiBwb2ludHM9IjUwLjMsMTMuNyA1MC4zLDE5LjIgNDYuNywyNi41IDM5LjMsMzMuOCAzMC4yLDQxLjIgMjQuNyw0Ni43IDE3LjMsNTIuMiAxMS44LDUyLjIgMTUuNSw0Ni43IDE5LjIsNDEuMiAyNi41LDMzLjggMzMuOCwyNi41IDQzLDE5LjIiIGZpbGw9IiNFOEI1ODYiLz48cG9seWdvbiBwb2ludHM9IjUwLjMsMzUuNyA1MC4zLDUyLjIgMzAuMiw1Mi4yIiBmaWxsPSIjRThCNTg2Ii8+PC9zdmc+">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzJBMjUzNiIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2LDE2KSBzY2FsZSg0KSIgZmlsbD0iI0U4QjU4NiI+PHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPjwvZz48L3N2Zz4=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
+<script src="coi-serviceworker.js"></script>
+<script>
+  // Applied here, before paint, so a returning visitor with light mode
+  // saved never sees a flash of the dark theme first.
+  (function () {
+    var theme = localStorage.getItem('genie-theme');
+    // Explicitly test for dark and default to light otherwise — testing
+    // for light and defaulting to dark meant any device that fails to
+    // report a preference at all (rather than reporting "no preference")
+    // silently landed on dark regardless of the device's actual setting.
+    if (!theme) theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    // Same reasoning — a class set before the "Try me" badge even exists
+    // in the DOM, matched by a CSS rule already parsed by the time it
+    // does, so a returning visitor never sees it flash in for a frame
+    // before JS later in <body> gets around to hiding it.
+    if (localStorage.getItem('genie-tried-me')) document.documentElement.classList.add('tried-me');
+    if (localStorage.getItem('genie-seen-chrome-tab')) document.documentElement.classList.add('seen-chrome-tab');
+  })();
+</script>
 <style>
   :root {
     --bg: #221E2C;
@@ -15,16 +38,40 @@
     --line: #443C56;
     --amber: #E8B586;
     --amber-dim: #937A63;
+    --amber-solid: #E8B586;
+    --green: #8FBF9F;
+    --green-dim: #5F8C6F;
     --text: #EDE7F5;
     --text-muted: #A79FBC;
+    --engrave-hi: rgba(255, 255, 255, 0.12);
+    --engrave-lo: rgba(0, 0, 0, 0.55);
+  }
+
+  html[data-theme="light"] {
+    --bg: #DCD2EA;
+    --bg-glow: #9C8AB8;
+    --panel: #CFC2E0;
+    --panel-2: #C4B6D6;
+    --line: #B3A2C9;
+    --amber: #96795D;
+    --amber-dim: #C7B39D;
+    --amber-solid: #D98F3E;
+    --green: #4B8F63;
+    --green-dim: #A8CBB4;
+    --text: #2E2840;
+    --text-muted: #473F5C;
+    --engrave-hi: rgba(255, 255, 255, 0.65);
+    --engrave-lo: rgba(0, 0, 0, 0.2);
   }
 
   * { box-sizing: border-box; }
 
-  html { background: var(--bg); }
+  html { background: var(--bg); scroll-behavior: smooth; }
 
   body {
     margin: 0;
+    min-height: 100vh;
+    box-sizing: border-box;
     background: radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
     color: var(--text);
     font-family: ui-serif, Georgia, "Iowan Old Style", serif;
@@ -46,9 +93,9 @@
     .wordmark-icon { width: 34px; height: 34px; }
     .wordmark-text { font-size: 38px; }
   }
-  .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; }
+  .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
+  html[data-theme="light"] .wordmark-icon { filter: drop-shadow(0 1px 0 rgba(255,255,255,0.7)) drop-shadow(0 -1px 0 rgba(0,0,0,0.12)); }
   .wordmark-icon polygon { fill: var(--bg); }
-  .wordmark-icon { filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
   .wordmark-text {
     font-size: 52px;
     font-weight: 400;
@@ -57,15 +104,16 @@
     color: var(--bg);
     text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 0 rgba(0,0,0,0.4);
   }
+  html[data-theme="light"] .wordmark-text { text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 -1px 0 rgba(0,0,0,0.12); }
+
 
   .download-btn {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-top: 56px;
     background: #1d1815;
     border: 1px solid var(--line);
-    color: var(--text);
+    color: #EDE7F5;
     font-family: ui-serif, Georgia, serif;
     font-size: 17px;
     font-weight: 700;
@@ -89,82 +137,288 @@
   .download-meta a { color: var(--text-muted); }
 
   /* --- Mockup of the actual app UI --- */
-  .mock-wrap { width: 100%; max-width: 620px; position: relative; }
+  .mock-wrap { width: 100%; max-width: 700px; position: relative; }
   .mock-window {
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 12px;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
     overflow: hidden;
     user-select: none;
   }
   .mock-titlebar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 7px;
     padding: 12px 14px;
     background: var(--panel-2);
     border-bottom: 1px solid var(--line);
+    position: relative;
   }
+  .mock-titlebar-dots { display: flex; align-items: center; gap: 7px; }
   .mock-dot { width: 11px; height: 11px; border-radius: 50%; }
   .mock-dot-red { background: #ED6A5E; }
   .mock-dot-yellow { background: #F4BF4F; }
   .mock-dot-green { background: #61C454; }
-  .mock-window-content { padding: 26px 22px 22px; }
+  .product-tabs { display: flex; align-items: center; gap: 6px; }
+  .product-tabs button {
+    font-family: ui-monospace, monospace; font-size: 16px; font-weight: 700;
+    letter-spacing: 0.03em; color: var(--text-muted);
+    background: none; border: none; border-radius: 7px;
+    padding: 7px 14px; cursor: pointer; transition: color 0.15s, background 0.15s;
+  }
+  .product-tabs button:hover { color: var(--text); }
+  .product-tabs button.active { background: var(--text-muted); color: var(--panel-2); }
+  .new-badge {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: #F0A8C4;
+    color: #4A1030;
+    vertical-align: 1px;
+  }
+  html.seen-chrome-tab .new-badge { display: none; }
+
+  /* --- Voice menu, styled to match the macOS app's own app-menu-panel --- */
+  .menu-toggle {
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .menu-toggle:hover { color: var(--amber); border-color: var(--amber-dim); }
+  .menu-toggle svg { width: 15px; height: 15px; }
+  .app-menu-panel {
+    position: absolute; top: calc(100% + 6px); right: 8px;
+    width: 240px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px; box-shadow: 0 14px 34px rgba(0,0,0,0.35); z-index: 25;
+    text-align: left;
+  }
+  .app-menu-panel[hidden] { display: none; }
+  .app-menu-section-label {
+    font-family: ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-muted); padding: 6px 8px 4px;
+  }
+  .voice-row-item {
+    display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 8px;
+    cursor: pointer; transition: background 0.12s;
+  }
+  .voice-row-item:hover { background: var(--panel-2); }
+  .voice-row-item.selected { background: rgba(232,181,134,0.14); }
+  .voice-row-name { flex: 1; font-family: ui-serif, Georgia, serif; font-size: 14px; color: var(--text); }
+  .voice-row-check { width: 14px; text-align: center; color: var(--amber); font-size: 13px; opacity: 0; }
+  .voice-row-item.selected .voice-row-check { opacity: 1; }
+  .app-menu-divider { height: 1px; background: var(--line); margin: 6px 4px; }
+  .app-menu-row {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px;
+    border: none; background: none; border-radius: 8px; cursor: pointer;
+    color: var(--text); font-family: ui-serif, Georgia, serif; font-size: 14px; text-align: left;
+    transition: background 0.12s;
+  }
+  .app-menu-row:hover { background: var(--panel-2); }
+  .theme-row #menu-theme-icon { font-size: 15px; line-height: 1; width: 16px; text-align: center; flex-shrink: 0; }
+  .theme-row #menu-theme-label { flex: 1; }
+  .theme-switch {
+    position: relative; width: 34px; height: 19px; background: var(--line);
+    border-radius: 10px; flex-shrink: 0; transition: background 0.2s ease;
+  }
+  .theme-switch.on { background: var(--amber-solid); }
+  .theme-switch-knob {
+    position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
+    background: var(--panel); border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+  }
+  .theme-switch.on .theme-switch-knob { transform: translateX(15px); }
+  .app-menu-version {
+    margin-top: 2px; padding: 8px; font-family: ui-monospace, monospace; font-size: 10.5px;
+    letter-spacing: 0.03em; color: var(--text-muted); text-align: center;
+  }
+  .mock-window-content { padding: 26px 22px 14px; }
   .mock-panel {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 14px;
     padding: 22px;
   }
+  .product-view { display: none; }
+  .product-view.active { display: block; }
+  .mock-panel.product-panel { text-align: center; }
+  .product-panel .features { max-width: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  /* --- macOS tab: a preview "screenshot" of the real app (traffic
+     lights, URL tab, Natural/Summary mode picker — the Pro-tier
+     rewrite modes the web version doesn't have), with a genuinely
+     working Try-me demo baked into it rather than a static image. --- */
+  .macos-promo-window {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    overflow: hidden;
+    text-align: left;
+    margin-bottom: 40px;
+  }
+  .product-panel .download-btn { margin-bottom: 4px; }
+  .product-panel .install-note { margin-top: 36px; }
+  .macos-promo-body { padding: 18px; }
+  .macos-fake-tabs {
+    display: flex; gap: 5px; margin-bottom: 14px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 3px;
+  }
+  .macos-fake-tabs div {
+    flex: 1; text-align: center; padding: 6px 0; border-radius: 6px;
+    font-family: ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted);
+  }
+  .macos-fake-tabs div.active { background: var(--text-muted); color: var(--panel-2); font-weight: 600; }
+  .macos-fake-input {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; margin-bottom: 14px;
+    font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .macos-fake-modes { display: flex; gap: 8px; margin-bottom: 20px; }
+  .macos-fake-modes div {
+    flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px;
+    text-align: center; font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted);
+  }
+  .macos-fake-modes div.active { border-color: var(--amber-dim); background: rgba(232,181,134,0.08); color: var(--text); }
   .mock-tabs { display: flex; gap: 5px; margin-bottom: 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
-  .mock-tabs div { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 10.5px; color: var(--text-muted); }
-  .mock-tabs div.active { background: var(--text-muted); color: var(--panel-2); font-weight: 600; }
+  .mock-tabs button {
+    flex: 1; text-align: center; padding: 8px 0; border-radius: 6px;
+    font-family: ui-monospace, monospace; font-size: 13px; color: var(--text-muted);
+    background: none; border: none; cursor: pointer;
+  }
+  .mock-tabs button.active { background: var(--text-muted); color: var(--panel-2); font-weight: 600; }
+  .mock-tabs button:disabled { cursor: default; opacity: 0.55; }
+  .mock-tabs button .unsupported { display: block; font-size: 9.5px; letter-spacing: 0.06em; margin-top: 1px; }
+  .mock-tabs button .unsupported.beta { color: var(--amber); text-transform: uppercase; }
+  .mock-tabs button.active .unsupported.beta { color: inherit; opacity: 0.7; }
+  .input-view { display: none; }
+  .input-view.active { display: block; }
+  .drop {
+    border: 1.5px dashed var(--line);
+    border-radius: 10px;
+    padding: 34px 16px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .drop:hover, .drop.dragover { border-color: var(--amber-dim); background: var(--panel-2); }
+  .drop p { margin: 0; color: var(--text-muted); font-size: 14px; }
+  .drop .drop-hint { margin-top: 5px; font-size: 11.5px; color: var(--text-muted); opacity: 0.75; }
+  .drop .fname { color: var(--amber); font-family: ui-monospace, monospace; font-size: 13px; margin-top: 8px; min-height: 16px; }
   .mock-field-label { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
   .mock-input { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-  .mock-go-wrap { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .mock-go-wrap { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 8px; }
   .mock-go {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--amber); color: #211603;
-    border-radius: 10px; padding: 11px 24px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--amber-solid); color: #211603;
+    border: 1px solid transparent; border-radius: 10px; padding: 11px 24px;
+    min-width: 90px;
     font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
     letter-spacing: 0.03em; text-transform: uppercase;
-    cursor: default;
+    cursor: pointer; transition: opacity 0.15s;
   }
+  .mock-go:hover { opacity: 0.9; }
+  .mock-go:disabled { opacity: 0.4; cursor: not-allowed; }
   .mock-go svg { width: 14px; height: 14px; }
-
-  .mock-field-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-  .mock-wand-btn {
-    width: 26px; height: 26px; border-radius: 50%;
-    border: 1px solid var(--line); background: var(--panel-2);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted);
+  .mock-go .go-content { display: inline-flex; align-items: center; gap: 8px; }
+  .mock-go .go-spinner {
+    display: none; width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(33,22,3,0.35); border-top-color: #211603;
+    animation: go-spin 0.7s linear infinite;
   }
-  .mock-wand-btn svg { width: 12px; height: 12px; }
+  .mock-go.loading .go-content { display: none; }
+  .mock-go.loading .go-spinner { display: inline-block; }
+  @keyframes go-spin { to { transform: rotate(360deg); } }
   .mock-textarea {
+    display: block;
+    width: 100%;
     background: var(--panel-2);
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 10px 12px;
-    min-height: 70px;
-    font-size: 13px;
-    font-style: italic;
-    color: var(--text-muted);
-    opacity: 0.7;
+    min-height: 129px;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
     margin-bottom: 16px;
   }
+  .mock-textarea:focus { border-color: var(--amber-dim); }
+  .mock-textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+  .demo-status {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    min-height: 14px;
+  }
+  .demo-status.error { color: #E29090; }
+  .browser-notice {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: #E29090;
+    background: rgba(226,144,144,0.1);
+    border: 1px solid #E29090;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 10px;
+  }
+  .cancel-btn {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .cancel-btn:hover { border-color: #E29090; color: #E29090; }
 
   .mock-divider-line { height: 1px; background: var(--line); margin: 18px 0; }
 
-  .mock-player { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; position: relative; }
+  .mock-player { position: relative; margin-top: 54px; }
+  /* No badge, no reason to reserve the space that cushions it from the
+     row above — set (along with actually hiding the badge) before paint
+     by the inline script in <head>. */
+  html.tried-me .mock-player { margin-top: 0; }
+  .player-reveal {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity 0.35s ease;
+  }
+  .player-reveal.revealed { max-height: 100px; opacity: 1; }
+  .macos-player-reveal.revealed { max-height: 220px; }
+  .mock-player-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
   .mock-play-btn {
     flex-shrink: 0;
     width: 34px; height: 34px; border-radius: 50%;
-    background: var(--amber); color: #211603;
+    background: var(--amber-solid); color: #211603;
     border: none; display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
   .mock-play-btn svg { width: 14px; height: 14px; }
+  .mock-skip-btn {
+    flex-shrink: 0; width: 28px; height: 28px; border: none; background: none;
+    color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .mock-skip-btn svg { width: 22px; height: 22px; }
+  @media (hover: hover) {
+    .mock-skip-btn:hover { color: var(--amber); }
+  }
   .mock-seek { flex: 1; min-width: 0; accent-color: var(--amber); cursor: pointer; }
   .mock-time { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); min-width: 66px; text-align: right; font-variant-numeric: tabular-nums; }
   .mock-speed-btn {
@@ -189,8 +443,10 @@
   @media (hover: hover) {
     .mock-script-btn:hover { color: var(--amber); border-color: var(--amber-dim); }
   }
+  .mock-script-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .mock-script-btn:disabled:hover { color: var(--text-muted); border-color: var(--line); }
   @media (max-width: 480px) {
-    .mock-player { gap: 6px; }
+    .mock-player-controls { gap: 6px; }
     .mock-time { min-width: 56px; font-size: 10px; }
     .mock-speed-btn { padding: 6px 6px; font-size: 10px; }
   }
@@ -203,7 +459,7 @@
     color: var(--text);
   }
   .script-word { transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease; border-radius: 3px; }
-  .script-word.active { background: var(--amber); color: #211603; box-shadow: 3px 0 0 var(--amber), -3px 0 0 var(--amber); }
+  .script-word.active { background: var(--amber-solid); color: #211603; box-shadow: 3px 0 0 var(--amber-solid), -3px 0 0 var(--amber-solid); }
 
   .demo-script-wrap {
     max-height: 0;
@@ -217,8 +473,8 @@
     position: absolute;
     left: 0;
     top: -42px;
-    background: #A8B4F0;
-    color: #1D2250;
+    background: #F0A8C4;
+    color: #4A1030;
     font-family: ui-monospace, monospace;
     font-size: 14px;
     font-weight: 700;
@@ -235,22 +491,23 @@
     transition: opacity 0.25s ease;
   }
   .try-me-badge.hidden { opacity: 0; pointer-events: none; }
+  html.tried-me .try-me-badge { display: none; }
   @keyframes try-me-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   @media (prefers-reduced-motion: reduce) { .try-me-badge { animation: none; } }
 
   .mock-footer {
     margin-top: 14px;
-    font-family: ui-monospace, monospace;
-    font-size: 8.5px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-family: 'Sacramento', cursive;
+    font-size: 16px;
     color: var(--text-muted);
+    text-shadow: 0 1px 0 var(--engrave-hi), 0 -1px 1px var(--engrave-lo);
     text-align: center;
   }
 
   .features {
     width: 100%;
     max-width: 720px;
+    margin-top: 40px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     align-items: start;
@@ -299,21 +556,44 @@
     .feature:hover .feature-desc { max-height: 140px; opacity: 1; margin-top: 10px; }
   }
 
-  .divider { width: 120px; height: 1px; background: var(--line); margin: 48px auto; }
+  .extension-promo-title { font-family: ui-serif, Georgia, serif; font-size: 28px; font-weight: 400; margin: 0 0 10px; color: var(--text); }
+  .extension-promo-desc { font-size: 14px; color: var(--text-muted); max-width: 440px; margin: 0 auto 28px; line-height: 1.6; }
+  .extension-promo-shots { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .extension-shot {
+    width: 100%; max-width: 660px; display: block;
+    border-radius: 10px; border: 1px solid var(--line);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
 
   .install-note {
     max-width: 480px;
-    margin: 0 auto;
+    margin: 40px auto 0;
     text-align: center;
     font-size: 13px;
     color: var(--text-muted);
     line-height: 1.6;
   }
-  .install-note b { color: var(--text); }
+  .pro-badge {
+    display: inline-block;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    padding: 1px 5px;
+    border-radius: 4px;
+    vertical-align: middle;
+  }
+  .pro-badge.free { color: var(--green); border-color: var(--green-dim); }
   .install-note code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 12px; color: var(--text); }
 
   footer {
-    margin-top: 56px;
+    width: 100%;
+    max-width: 700px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
     font-size: 12px;
     color: var(--text-muted);
     text-align: center;
@@ -332,44 +612,95 @@
   <div class="mock-wrap">
     <div class="mock-window">
       <div class="mock-titlebar">
-        <span class="mock-dot mock-dot-red"></span>
-        <span class="mock-dot mock-dot-yellow"></span>
-        <span class="mock-dot mock-dot-green"></span>
+        <div class="product-tabs">
+          <button type="button" class="active" id="tab-product-web">Web</button>
+          <button type="button" id="tab-product-macos">macOS</button>
+          <button type="button" id="tab-product-chrome">Chrome<span class="new-badge">New</span></button>
+        </div>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Voice settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/></svg>
+        </button>
+        <div class="app-menu-panel" id="app-menu-panel" hidden>
+          <button class="app-menu-row theme-row" id="menu-theme-btn" type="button">
+            <span id="menu-theme-icon">&#9789;</span>
+            <span id="menu-theme-label">Theme</span>
+            <span class="theme-switch" id="theme-switch"><span class="theme-switch-knob"></span></span>
+          </button>
+          <div class="app-menu-divider"></div>
+          <div class="app-menu-section-label">Voice</div>
+          <div class="voice-row-item" data-voice="af_heart">
+            <span class="voice-row-name">Heart (American, Female)</span>
+            <span class="voice-row-check">&#10003;</span>
+          </div>
+          <div class="voice-row-item" data-voice="am_adam">
+            <span class="voice-row-name">Adam (American, Male)</span>
+            <span class="voice-row-check">&#10003;</span>
+          </div>
+          <div class="voice-row-item" data-voice="bf_alice">
+            <span class="voice-row-name">Alice (British, Female)</span>
+            <span class="voice-row-check">&#10003;</span>
+          </div>
+          <div class="voice-row-item" data-voice="bm_george">
+            <span class="voice-row-name">George (British, Male)</span>
+            <span class="voice-row-check">&#10003;</span>
+          </div>
+          <div class="app-menu-divider"></div>
+          <div class="app-menu-version">Genie Reader v2.0.0</div>
+        </div>
       </div>
       <div class="mock-window-content">
+        <div class="product-view active" id="view-product-web">
         <div class="mock-panel">
           <div class="mock-tabs">
-            <div>URL</div>
-            <div class="active">Text</div>
-            <div>Document</div>
+            <button type="button" class="active" id="tab-text">Text</button>
+            <button type="button" id="tab-document">Document<span class="unsupported beta">beta</span></button>
           </div>
-          <div class="mock-field-row">
-            <div class="mock-field-label">Article Text</div>
-            <div class="mock-wand-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3Z"/><path d="M18 13l.6 1.8 1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6.6-1.8Z"/></svg>
+          <div class="input-view active" id="view-text">
+            <textarea class="mock-textarea" id="text-input" placeholder="Paste any text you'd like read aloud…" autofocus></textarea>
+          </div>
+          <div class="input-view" id="view-document">
+            <div class="drop" id="drop-zone">
+              <p>Click to choose a document, or drag one here</p>
+              <p class="drop-hint">PDF, Word (.docx), or plain text</p>
+              <p class="fname" id="drop-fname"></p>
             </div>
+            <input type="file" id="document-input" accept=".pdf,.docx,.txt,.md" hidden>
           </div>
-          <div class="mock-textarea">Paste the article or newsletter text here…</div>
+          <div class="browser-notice" id="browser-notice" hidden>Not compatible with Safari yet — please try Chrome or Edge.</div>
           <div class="mock-go-wrap">
-            <div class="mock-go">GO <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg></div>
+            <div class="demo-status" id="demo-status" style="margin:0; flex:1; text-align:left;"></div>
+            <button class="cancel-btn" id="cancel-btn" type="button" hidden>Cancel</button>
+            <button class="mock-go" id="go-btn" type="button" aria-label="Read"><span class="go-content">Read</span><span class="go-spinner"></span></button>
           </div>
 
-          <div class="mock-divider-line"></div>
-
-          <div class="mock-player">
-            <button class="try-me-badge" id="try-me-badge" type="button">Try me</button>
-            <button class="mock-play-btn" id="demo-play-btn" type="button" aria-label="Play demo reading">
-              <svg id="demo-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>
-            </button>
-            <input class="mock-seek" id="demo-seek" type="range" min="0" max="1000" value="0">
-            <span class="mock-time" id="demo-time">0:00 / 0:00</span>
-            <button class="mock-speed-btn" id="demo-speed-btn" type="button">1x</button>
+          <!-- Hidden until the first GO — an empty player and a "0:00
+               / --:--" placeholder before there's anything to play doesn't
+               match how the real app only shows a player once one exists. -->
+          <div class="player-reveal" id="player-reveal">
+            <div class="mock-divider-line"></div>
+            <div class="mock-player-controls">
+              <button class="mock-skip-btn" id="demo-skip-back" type="button" aria-label="Rewind 15 seconds" title="Rewind 15 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="12" y="17" font-size="7.5" font-family="ui-monospace, monospace" font-weight="700" text-anchor="middle">15</text></svg>
+              </button>
+              <button class="mock-play-btn" id="demo-play-btn" type="button" aria-label="Play generated reading" disabled>
+                <svg id="demo-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>
+              </button>
+              <button class="mock-skip-btn" id="demo-skip-fwd" type="button" aria-label="Forward 15 seconds" title="Forward 15 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor"><g transform="scale(-1,1) translate(-24,0)"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></g><text x="12" y="17" font-size="7.5" font-family="ui-monospace, monospace" font-weight="700" text-anchor="middle">15</text></svg>
+              </button>
+              <input class="mock-seek" id="demo-seek" type="range" min="0" max="1000" value="0">
+              <span class="mock-time" id="demo-time">0:00 / --:--</span>
+              <button class="mock-speed-btn" id="demo-speed-btn" type="button">1x</button>
+            </div>
           </div>
 
           <div class="demo-script-wrap" id="demo-script-wrap">
             <div class="mock-script-head">
               <div class="mock-field-label" style="margin-bottom:0;">Script</div>
               <div class="mock-script-actions">
+                <button class="mock-script-btn" id="demo-download-btn" type="button" aria-label="Download generated audio" title="Download audio" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                </button>
                 <button class="mock-script-btn" id="demo-copy-btn" type="button" aria-label="Copy script">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
@@ -380,22 +711,60 @@
             <div class="mock-script-text" id="demo-script-text"></div>
           </div>
         </div>
-        <div class="mock-footer">Local · Private · Reads Anything Aloud</div>
+        <audio id="demo-audio"></audio>
+        </div>
+
+        <div class="product-view" id="view-product-macos">
+        <div class="mock-panel product-panel">
+  <h2 class="extension-promo-title">Genie Reader for macOS</h2>
+  <p class="extension-promo-desc">Where the real magic happens.</p>
+  <div class="macos-promo-window">
+    <div class="mock-titlebar">
+      <span class="mock-titlebar-dots">
+        <span class="mock-dot mock-dot-red"></span>
+        <span class="mock-dot mock-dot-yellow"></span>
+        <span class="mock-dot mock-dot-green"></span>
+      </span>
+    </div>
+    <div class="macos-promo-body">
+      <div class="macos-fake-tabs">
+        <div class="active">URL</div>
+        <div>Text</div>
+        <div>Document</div>
+      </div>
+      <div class="macos-fake-input">https://example.com/the-quiet-return-of-the-personal-library</div>
+      <div class="macos-fake-modes">
+        <div class="active">Original</div>
+        <div>Natural</div>
+        <div>Summary</div>
+      </div>
+
+      <div class="mock-player">
+        <button class="try-me-badge" id="macos-try-me-btn" type="button">Try me</button>
+      </div>
+
+      <div class="player-reveal macos-player-reveal" id="macos-player-reveal">
+        <div class="mock-divider-line"></div>
+        <div class="mock-player-controls">
+          <button class="mock-play-btn" id="macos-play-btn" type="button" aria-label="Play demo">
+            <svg id="macos-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>
+          </button>
+          <input class="mock-seek" id="macos-seek" type="range" min="0" max="1000" value="0">
+          <span class="mock-time" id="macos-time">0:00 / 0:00</span>
+        </div>
+        <div class="mock-script-text" id="macos-script-text"></div>
       </div>
     </div>
   </div>
+  <audio id="macos-demo-audio"></audio>
 
-  <audio id="demo-audio" src="demo-reading.wav" preload="metadata"></audio>
-
-  <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/latest/download/GenieReader-2.0.0.dmg">
+  <a class="download-btn" href="https://github.com/mazen-kasser/genie-reader/releases/download/v2.0.0/Genie.Reader-2.0.0.dmg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
     Download for macOS
   </a>
   <div class="download-meta">
-    Available <b>FREE</b> on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
+    Available <span class="pro-badge free">FREE</span> on Apple Silicon · <a href="https://github.com/mazen-kasser/genie-reader/releases">See all releases</a>
   </div>
-
-  <div class="divider"></div>
 
   <div class="features">
     <div class="feature">
@@ -412,7 +781,7 @@
         <span class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>
         </span>
-        <div class="feature-title">100% local &amp; private</div>
+        <div class="feature-title">Local &amp; Secure</div>
       </div>
       <div class="feature-desc">Text-to-speech runs on-device via Kokoro — nothing leaves your Mac.</div>
     </div>
@@ -427,154 +796,803 @@
     </div>
   </div>
 
-  <div class="divider"></div>
   <div class="install-note">
-    <b>Installing:</b> open the downloaded <code>.dmg</code> and drag Genie Reader
-    into your Applications folder. Genie Reader pro expects
-    <a href="https://ollama.com" style="color:var(--text)">Ollama</a> for the
-    article rewriting step; it'll offer to install this automatically on
+    Genie Reader <span class="pro-badge">PRO</span> uses
+    <a href="https://ollama.com" style="color:var(--text)">Ollama</a> to power
+    the rewriting step — it'll offer to install this automatically on
     first run if it's missing.
+  </div>
+        </div>
+        </div>
+
+        <div class="product-view" id="view-product-chrome">
+        <div class="mock-panel product-panel">
+  <h2 class="extension-promo-title">Genie Reader for Chrome</h2>
+    <p class="extension-promo-desc">Aladdin would've wished for this!</p>
+    <div class="extension-promo-shots">
+      <img class="extension-shot" src="extension-screenshot-popup.png" alt="Genie Reader's Chrome extension popup, showing the voice picker">
+    </div>
+    <a class="download-btn" href="https://chromewebstore.google.com/detail/genie-reader/fehminldoajajhhmefjllfbnndngogfg" style="margin-top:28px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      Add to Chrome
+    </a>
+    <div class="download-meta">Available <span class="pro-badge free">FREE</span> on the Chrome Web Store</div>
+        </div>
+        </div>
+        <div class="mock-footer">Private by design</div>
+      </div>
+    </div>
   </div>
 
   <footer>
-    <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a>
+    <a href="privacy.html">Privacy</a> · <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a>
   </footer>
 
-<script>
-  // The "Try me" demo player: a real recording made with the app itself,
-  // reading its own pitch text. Kokoro generates audio sentence-by-sentence
-  // and the app derives word highlight timing from each sentence's real
-  // duration (see speak() in app.py) — we don't have that per-sentence
-  // breakdown for a static page, so this approximates it: weight each word
-  // by its letter count plus extra weight for trailing punctuation (commas
-  // pause briefly, sentence-enders pause longer), then distribute the
-  // recording's total duration proportionally. Close enough to track the
-  // real audio convincingly without shipping a separate timing file.
-  (function () {
-    var scriptTextRaw = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your Mac; nothing is sent to the cloud. Unlimited wishes — limited only by your RAM.";
-    var audio = document.getElementById('demo-audio');
-    var playBtn = document.getElementById('demo-play-btn');
-    var playIcon = document.getElementById('demo-play-icon');
-    var seek = document.getElementById('demo-seek');
-    var timeEl = document.getElementById('demo-time');
-    var speedBtn = document.getElementById('demo-speed-btn');
-    var copyBtn = document.getElementById('demo-copy-btn');
-    var fontMinus = document.getElementById('demo-font-minus');
-    var fontPlus = document.getElementById('demo-font-plus');
-    var scriptEl = document.getElementById('demo-script-text');
-    var scriptWrap = document.getElementById('demo-script-wrap');
-    var tryMeBadge = document.getElementById('try-me-badge');
+<script type="module">
+  // Real, on-device text-to-speech — the same Kokoro engine (via ONNX
+  // Runtime Web/WASM) as the Chrome extension and the macOS app, just
+  // running directly on this page instead of behind an extension's
+  // offscreen-document workaround. No server: the model downloads once
+  // from Hugging Face on first use and everything after that runs
+  // entirely in this browser tab.
+  import { KokoroTTS, env } from "./vendor/kokoro.web.js";
+  // Must be an absolute URL, not a bare relative string — resolving the
+  // runtime's own internal module/file lookups against a plain relative
+  // path fails from this context.
+  env.wasmPaths = new URL('vendor/wasm/', document.baseURI).href;
 
-    var ICON_PLAY = '<path d="M8 5v14l11-7Z"/>';
-    var ICON_PAUSE = '<path d="M7 5h4v14H7Z"/><path d="M13 5h4v14h-4Z"/>';
+  const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
+  let voice = localStorage.getItem('genie-voice') || "af_heart";
+  // Displayed with the correct capitalization ("RAM") for the on-screen
+  // script — the actual demo-reading.wav clip was generated from this
+  // same text with "ram" lowercased instead, since Kokoro reads an
+  // all-caps word as an acronym to spell out letter-by-letter rather
+  // than as the word it actually is. Word-highlight timing is estimated
+  // from each word's letter count, which is identical either way, so the
+  // display text can differ from what was actually spoken without
+  // desyncing the highlighting.
+  const TRY_ME_TEXT = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your device; nothing is sent to the cloud. Unlimited wishes — limited only by your RAM.";
 
-    var words = scriptTextRaw.split(/\s+/);
-    var weights = words.map(function (w) {
-      var letters = w.replace(/[^a-zA-Z0-9]/g, '').length;
-      var weight = letters + 2;
-      if (/[.!?]$/.test(w)) weight += 6;
-      else if (/[,;:—]$/.test(w)) weight += 3;
-      return weight;
+  const textInput = document.getElementById('text-input');
+  const goBtn = document.getElementById('go-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const statusEl = document.getElementById('demo-status');
+  const playerReveal = document.getElementById('player-reveal');
+  const audio = document.getElementById('demo-audio');
+  const playBtn = document.getElementById('demo-play-btn');
+  const skipBackBtn = document.getElementById('demo-skip-back');
+  const skipFwdBtn = document.getElementById('demo-skip-fwd');
+  const playIcon = document.getElementById('demo-play-icon');
+  const seek = document.getElementById('demo-seek');
+  const timeEl = document.getElementById('demo-time');
+  const speedBtn = document.getElementById('demo-speed-btn');
+  const copyBtn = document.getElementById('demo-copy-btn');
+  const downloadBtn = document.getElementById('demo-download-btn');
+  const fontMinus = document.getElementById('demo-font-minus');
+  const fontPlus = document.getElementById('demo-font-plus');
+  const scriptEl = document.getElementById('demo-script-text');
+  const scriptWrap = document.getElementById('demo-script-wrap');
+
+  const tabTextBtn = document.getElementById('tab-text');
+  const tabDocumentBtn = document.getElementById('tab-document');
+  const viewText = document.getElementById('view-text');
+  const viewDocument = document.getElementById('view-document');
+  const dropZone = document.getElementById('drop-zone');
+  const dropFname = document.getElementById('drop-fname');
+  const documentInput = document.getElementById('document-input');
+
+  const productTabs = {
+    web: { btn: document.getElementById('tab-product-web'), view: document.getElementById('view-product-web') },
+    macos: { btn: document.getElementById('tab-product-macos'), view: document.getElementById('view-product-macos') },
+    chrome: { btn: document.getElementById('tab-product-chrome'), view: document.getElementById('view-product-chrome') },
+  };
+
+  const macosTryMeBtn = document.getElementById('macos-try-me-btn');
+  const macosPlayerReveal = document.getElementById('macos-player-reveal');
+  const macosPlayBtn = document.getElementById('macos-play-btn');
+  const macosPlayIcon = document.getElementById('macos-play-icon');
+  const macosSeek = document.getElementById('macos-seek');
+  const macosTime = document.getElementById('macos-time');
+  const macosScriptEl = document.getElementById('macos-script-text');
+  const macosAudio = document.getElementById('macos-demo-audio');
+
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuPanel = document.getElementById('app-menu-panel');
+  const voiceRows = Array.from(menuPanel.querySelectorAll('.voice-row-item'));
+
+  function markSelectedVoice() {
+    voiceRows.forEach((row) => row.classList.toggle('selected', row.dataset.voice === voice));
+  }
+  markSelectedVoice();
+
+  function closeMenu() {
+    menuPanel.hidden = true;
+    menuToggle.setAttribute('aria-expanded', 'false');
+  }
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = menuPanel.hidden;
+    menuPanel.hidden = !willOpen;
+    menuToggle.setAttribute('aria-expanded', String(willOpen));
+  });
+  document.addEventListener('click', (e) => {
+    if (!menuPanel.hidden && !menuPanel.contains(e.target) && e.target !== menuToggle) closeMenu();
+  });
+  voiceRows.forEach((row) => {
+    row.addEventListener('click', () => {
+      voice = row.dataset.voice;
+      localStorage.setItem('genie-voice', voice);
+      markSelectedVoice();
+      closeMenu();
+      // A change mid-generation would otherwise apply only to whatever
+      // sentence happens to still be in flight — simplest, least
+      // surprising behavior is to just drop the in-progress model
+      // session so the next Read/Try picks the new voice up cleanly.
+      ttsPromise = null;
     });
-    var totalWeight = weights.reduce(function (a, b) { return a + b; }, 0);
-    var cum = 0;
-    var boundaries = weights.map(function (w) {
-      cum += w;
-      return cum / totalWeight;
-    });
+  });
 
-    scriptEl.innerHTML = words.map(function (w, i) {
-      return '<span class="script-word" data-i="' + i + '">' + w + '</span>';
-    }).join(' ');
-    var wordSpans = scriptEl.querySelectorAll('.script-word');
+  // Theme: the actual data-theme attribute is already applied by the
+  // inline script in <head> (before paint, to avoid a flash) — this just
+  // syncs the toggle's own visuals to that and handles switching it.
+  const themeToggle = document.getElementById('menu-theme-btn');
+  const themeIcon = document.getElementById('menu-theme-icon');
+  const themeSwitch = document.getElementById('theme-switch');
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeIcon.innerHTML = theme === 'dark' ? '&#9789;' : '&#9788;';
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    themeSwitch.classList.toggle('on', theme === 'dark');
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('genie-theme', next);
+    applyTheme(next);
+  });
 
-    function fmtTime(s) {
-      if (!isFinite(s)) return '0:00';
-      var m = Math.floor(s / 60);
-      var sec = Math.floor(s % 60);
-      return m + ':' + (sec < 10 ? '0' : '') + sec;
+  const ICON_PLAY = '<path d="M8 5v14l11-7Z"/>';
+  const ICON_PAUSE = '<path d="M7 5h4v14H7Z"/><path d="M13 5h4v14h-4Z"/>';
+
+  // "Try me" stays instant — a real pre-recorded clip, no model download —
+  // so a curious visitor hears something immediately. Only the real GO
+  // button (their own text) triggers actual on-device generation. Both
+  // paths drive the same player controls, so a `mode` flag tells the
+  // shared handlers below which timing/seeking logic applies.
+  let mode = null; // 'demo' | 'real'
+  const DEMO_AUDIO_SRC = 'demo-reading.wav';
+  const demoWeights = TRY_ME_TEXT.split(/\s+/).map((w) => {
+    const letters = w.replace(/[^a-zA-Z0-9]/g, '').length;
+    let weight = letters + 2;
+    if (/[.!?]$/.test(w)) weight += 6;
+    else if (/[,;:—]$/.test(w)) weight += 3;
+    return weight;
+  });
+  const demoTotalWeight = demoWeights.reduce((a, b) => a + b, 0);
+  let demoCum = 0;
+  const demoBoundaries = demoWeights.map((w) => { demoCum += w; return demoCum / demoTotalWeight; });
+
+  function renderScriptWords(text, target) {
+    target = target || scriptEl;
+    const words = text.split(/\s+/).filter(Boolean);
+    target.innerHTML = words.map((w, i) => '<span class="script-word" data-i="' + i + '">' + w + '</span>').join(' ');
+    return Array.from(target.querySelectorAll('.script-word'));
+  }
+
+  let ttsPromise = null;
+  function getTTS(onProgress) {
+    if (!ttsPromise) {
+      ttsPromise = (async () => {
+        // Deliberately wasm-only, no WebGPU attempt — verified by hand that
+        // WebGPU init fails in this build (same underlying WASM-loading
+        // error either way), and worse, attempting it first left the
+        // shared onnxruntime-web env in a state that then broke the wasm
+        // fallback too, even though wasm alone works perfectly on its own.
+        // Also fp32, not the smaller q8 quantized weights the Chrome
+        // extension uses: q8 fails backend init outright on the wasm/CPU
+        // execution path in this build — a real incompatibility, not a
+        // config issue. (onnxruntime-web's error for both of these is
+        // misleadingly labeled "[webgpu]" regardless of what actually
+        // failed, which took a while to track down.)
+        return KokoroTTS.from_pretrained(MODEL_ID, { dtype: "fp32", device: "wasm", progress_callback: onProgress });
+      })();
     }
+    return ttsPromise;
+  }
 
-    function updateTime() {
-      var dur = audio.duration || 0;
+  function encodeWav(samples, sampleRate) {
+    const bytesPerSample = 2;
+    const buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
+    const view = new DataView(buffer);
+    function writeString(offset, str) {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    }
+    writeString(0, "RIFF");
+    view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+    writeString(8, "WAVE");
+    writeString(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * bytesPerSample, true);
+    view.setUint16(32, bytesPerSample, true);
+    view.setUint16(34, 16, true);
+    writeString(36, "data");
+    view.setUint32(40, samples.length * bytesPerSample, true);
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++, offset += bytesPerSample) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return buffer;
+  }
+
+  // Same reasoning as the extension: tts.stream() hangs past the first
+  // chunk, so sentences are split ourselves and generated one at a time.
+  function splitIntoSentences(text) {
+    return text.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  }
+
+  function fmtTime(s) {
+    if (!isFinite(s) || s < 0) s = 0;
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function setStatus(text, isError) {
+    statusEl.textContent = text || '';
+    statusEl.classList.toggle('error', !!isError);
+  }
+
+  // Hides the Try-me badge for good (this session and future visits) and
+  // collapses the space .mock-player reserves above it for the badge's
+  // absolute positioning — applied live, not just on the next page load,
+  // so that space doesn't linger empty for the rest of this session.
+  function markTried() {
+    localStorage.setItem('genie-tried-me', '1');
+    document.documentElement.classList.add('tried-me');
+  }
+
+  // Kokoro gives no per-word timestamps in the browser — each word gets a
+  // slice of its sentence's real generated duration, proportional to its
+  // character length. Same estimate the extension and the macOS app use.
+  function buildChunkWordTimings(chunkText, duration, spansSlice) {
+    const parts = chunkText.trim().split(/\s+/).filter(Boolean);
+    const totalChars = parts.reduce((a, w) => a + w.length, 0) || 1;
+    const words = [];
+    let cursor = 0;
+    parts.forEach((word, i) => {
+      const wDur = duration * (word.length / totalChars);
+      words.push({ start: cursor, end: cursor + wDur, span: spansSlice[i] || null });
+      cursor += wDur;
+    });
+    return words;
+  }
+
+  // --- Player state — a chunk queue playing back while generation is
+  // still catching up, same shape as the Chrome extension's panel. ---
+  let chunkQueue = [];
+  let currentChunkIndex = -1;
+  let allChunksReceived = false;
+  let waitingForChunk = true;
+  let wordSpans = [];
+  let activeWordEl = null;
+  let generationToken = 0; // bumped per go() so a superseded run can't clobber newer state
+
+  // Raw (undecoded-to-WAV) audio kept alongside chunkQueue purely so the
+  // full reading can be stitched into one downloadable file once every
+  // sentence is in — chunkQueue's blobUrls stay per-sentence for playback.
+  let rawAudioChunks = [];
+  let audioSampleRate = null;
+  let finalAudioBlobUrl = null;
+
+  function bufferedSeconds() { return chunkQueue.reduce((a, c) => a + c.duration, 0); }
+  function globalElapsedSeconds() {
+    let sum = 0;
+    for (let i = 0; i < currentChunkIndex; i++) if (chunkQueue[i]) sum += chunkQueue[i].duration;
+    if (currentChunkIndex >= 0) sum += audio.currentTime;
+    return sum;
+  }
+  function renderTimeline() {
+    const buffered = bufferedSeconds();
+    const elapsed = globalElapsedSeconds();
+    const total = Math.max(buffered, elapsed, 1);
+    seek.value = String(Math.round((elapsed / total) * 1000));
+    timeEl.textContent = fmtTime(elapsed) + ' / ' + fmtTime(total) + (allChunksReceived ? '' : '~');
+    playBtn.disabled = chunkQueue.length === 0;
+  }
+  function highlightWord(span) {
+    if (activeWordEl === span) return;
+    if (activeWordEl) activeWordEl.classList.remove('active');
+    activeWordEl = span || null;
+    if (activeWordEl) activeWordEl.classList.add('active');
+  }
+  function playChunk(index) {
+    const chunk = chunkQueue[index];
+    if (!chunk) return;
+    waitingForChunk = false;
+    currentChunkIndex = index;
+    audio.src = chunk.blobUrl;
+    audio.load();
+    const playToken = currentChunkIndex;
+    // A blob URL that never loads (readyState stuck at 0) leaves play()'s
+    // promise neither resolved nor rejected in some cases — this makes
+    // sure that still surfaces something actionable instead of hanging
+    // with no feedback at all.
+    setTimeout(() => {
+      if (currentChunkIndex === playToken && audio.readyState === 0) {
+        setStatus("Couldn't load that part of the audio — click ▶ again.", true);
+      }
+    }, 4000);
+    audio.play().catch(() => setStatus("Couldn't start playback — click ▶ again.", true));
+  }
+  function advanceOrWait() {
+    const next = currentChunkIndex + 1;
+    if (chunkQueue[next]) {
+      playChunk(next);
+    } else if (allChunksReceived) {
+      highlightWord(null);
+    } else {
+      waitingForChunk = true; // generation loop resumes playback once the next chunk lands
+    }
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (mode === 'demo') {
+      if (audio.paused) audio.play().catch(() => {});
+      else audio.pause();
+      return;
+    }
+    if (currentChunkIndex === -1) {
+      if (chunkQueue.length) playChunk(0);
+      return;
+    }
+    if (audio.paused) audio.play().catch(() => setStatus("Couldn't start playback — click ▶ again.", true));
+    else audio.pause();
+  });
+  audio.addEventListener('play', () => {
+    playIcon.innerHTML = ICON_PAUSE;
+    // Clears a stale "couldn't start playback" from an earlier attempt
+    // once a later one actually succeeds.
+    if (mode) setStatus('');
+  });
+  audio.addEventListener('pause', () => { playIcon.innerHTML = ICON_PLAY; });
+  audio.addEventListener('ended', () => {
+    highlightWord(null);
+    if (mode === 'demo') { seek.value = '0'; return; }
+    advanceOrWait();
+  });
+  audio.addEventListener('timeupdate', () => {
+    if (mode === 'demo') {
+      const dur = audio.duration || 0;
       timeEl.textContent = fmtTime(audio.currentTime) + ' / ' + fmtTime(dur);
-    }
-
-    audio.addEventListener('loadedmetadata', updateTime);
-
-    var activeIdx = -1;
-    audio.addEventListener('timeupdate', function () {
-      updateTime();
-      var dur = audio.duration || 0;
       if (dur > 0) seek.value = String(Math.round((audio.currentTime / dur) * 1000));
-      var frac = dur > 0 ? audio.currentTime / dur : 0;
-      var newIdx = 0;
-      while (newIdx < boundaries.length - 1 && boundaries[newIdx] < frac) newIdx++;
-      if (newIdx !== activeIdx) {
-        if (activeIdx >= 0) wordSpans[activeIdx].classList.remove('active');
-        wordSpans[newIdx].classList.add('active');
-        activeIdx = newIdx;
-      }
-    });
-
-    audio.addEventListener('ended', function () {
-      playIcon.innerHTML = ICON_PLAY;
-      if (activeIdx >= 0) wordSpans[activeIdx].classList.remove('active');
-      activeIdx = -1;
-      seek.value = '0';
-    });
-
-    function togglePlay() {
-      if (audio.paused) {
-        audio.play();
-        playIcon.innerHTML = ICON_PAUSE;
-        tryMeBadge.classList.add('hidden');
-        scriptWrap.classList.add('revealed');
-      } else {
-        audio.pause();
-        playIcon.innerHTML = ICON_PLAY;
-      }
+      const frac = dur > 0 ? audio.currentTime / dur : 0;
+      let idx = 0;
+      while (idx < demoBoundaries.length - 1 && demoBoundaries[idx] < frac) idx++;
+      highlightWord(wordSpans[idx] || null);
+      return;
     }
-    playBtn.addEventListener('click', togglePlay);
-    tryMeBadge.addEventListener('click', togglePlay);
+    renderTimeline();
+    const chunk = chunkQueue[currentChunkIndex];
+    if (!chunk) return;
+    const t = audio.currentTime;
+    const w = chunk.words.find((w) => t >= w.start && t < w.end);
+    highlightWord(w ? w.span : null);
+  });
 
-    seek.addEventListener('input', function () {
-      var dur = audio.duration || 0;
+  // Seeking is only allowed within what's actually been generated so far
+  // (real mode) — the demo clip is a fixed file, so it can seek freely.
+  // Shared by the seek bar and the rewind/forward-15 buttons.
+  function seekToRealTarget(target) {
+    if (!chunkQueue.length) return;
+    const buffered = bufferedSeconds();
+    target = Math.max(0, Math.min(target, Math.max(0, buffered - 0.05)));
+    let acc = 0;
+    for (let i = 0; i < chunkQueue.length; i++) {
+      const dur = chunkQueue[i].duration;
+      const isLast = i === chunkQueue.length - 1;
+      if (target < acc + dur || isLast) {
+        const offset = Math.max(0, Math.min(dur, target - acc));
+        if (i === currentChunkIndex) audio.currentTime = offset;
+        else playChunk(i);
+        return;
+      }
+      acc += dur;
+    }
+  }
+  seek.addEventListener('input', () => {
+    if (mode === 'demo') {
+      const dur = audio.duration || 0;
       if (dur > 0) audio.currentTime = (Number(seek.value) / 1000) * dur;
-    });
-
-    var speeds = [1, 1.25, 1.5, 0.75];
-    var speedIdx = 0;
-    speedBtn.addEventListener('click', function () {
-      speedIdx = (speedIdx + 1) % speeds.length;
-      audio.playbackRate = speeds[speedIdx];
-      speedBtn.textContent = speeds[speedIdx] + 'x';
-    });
-
-    copyBtn.addEventListener('click', function () {
-      navigator.clipboard.writeText(scriptTextRaw).then(function () {
-        copyBtn.style.color = 'var(--amber)';
-        copyBtn.style.borderColor = 'var(--amber-dim)';
-        setTimeout(function () {
-          copyBtn.style.color = '';
-          copyBtn.style.borderColor = '';
-        }, 1200);
-      });
-    });
-
-    var fontSize = 18;
-    function applyFontSize() {
-      scriptEl.style.setProperty('--script-fs', fontSize + 'px');
+      return;
     }
-    fontMinus.addEventListener('click', function () {
-      fontSize = Math.max(16, fontSize - 2);
-      applyFontSize();
+    const total = Math.max(bufferedSeconds(), globalElapsedSeconds(), 1);
+    seekToRealTarget((Number(seek.value) / 1000) * total);
+  });
+
+  function skipBy(deltaSeconds) {
+    if (mode === 'demo') {
+      const dur = audio.duration || 0;
+      if (dur > 0) audio.currentTime = Math.max(0, Math.min(dur, audio.currentTime + deltaSeconds));
+      return;
+    }
+    if (mode === 'real') seekToRealTarget(globalElapsedSeconds() + deltaSeconds);
+  }
+  skipBackBtn.addEventListener('click', () => skipBy(-15));
+  skipFwdBtn.addEventListener('click', () => skipBy(15));
+
+  const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
+  let speedIdx = 0;
+  speedBtn.addEventListener('click', () => {
+    speedIdx = (speedIdx + 1) % SPEEDS.length;
+    audio.playbackRate = SPEEDS[speedIdx];
+    speedBtn.textContent = SPEEDS[speedIdx] + 'x';
+  });
+
+  let fontSize = 18;
+  function applyFontSize() { scriptEl.style.setProperty('--script-fs', fontSize + 'px'); }
+  fontMinus.addEventListener('click', () => { fontSize = Math.max(16, fontSize - 2); applyFontSize(); });
+  fontPlus.addEventListener('click', () => { fontSize = Math.min(40, fontSize + 2); applyFontSize(); });
+
+  let currentScriptText = '';
+  copyBtn.addEventListener('click', () => {
+    if (!currentScriptText) return;
+    navigator.clipboard.writeText(currentScriptText).then(() => {
+      copyBtn.style.color = 'var(--amber)';
+      copyBtn.style.borderColor = 'var(--amber-dim)';
+      setTimeout(() => { copyBtn.style.color = ''; copyBtn.style.borderColor = ''; }, 1200);
     });
-    fontPlus.addEventListener('click', function () {
-      fontSize = Math.min(40, fontSize + 2);
-      applyFontSize();
-    });
-  })();
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!finalAudioBlobUrl) return;
+    const a = document.createElement('a');
+    a.href = finalAudioBlobUrl;
+    a.download = 'genie-reader-reading.wav';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  // Safari's support for the cross-origin-isolation trick this needs
+  // (coi-serviceworker.js, so the threaded WASM runtime can get a
+  // SharedArrayBuffer) has real gaps on the desktop build — detected here
+  // (excluding Chrome/Edge/Chromium, which also carry "Safari" in their UA
+  // string) so a failure can point the visitor at a browser known to work
+  // instead of just showing a raw error. iOS/iPadOS Safari shares the name
+  // but not the bug, so it's excluded too (checked via UA plus the
+  // touch-point trick for iPadOS, which reports a Mac-style UA).
+  function isSafari() {
+    const ua = navigator.userAgent;
+    const isSafariEngine = /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return isSafariEngine && !isIOS;
+  }
+  function describeError(err) {
+    const msg = 'Something went wrong generating audio: ' + (err && err.message ? err.message : err);
+    return isSafari() ? msg + ' Safari isn\'t supported yet — please try Chrome or Edge.' : msg;
+  }
+  // A persistent banner, not the status line — the status line gets
+  // overwritten the moment they click GO, which would make a one-off
+  // "works best elsewhere" message disappear right when it matters most.
+  if (isSafari()) document.getElementById('browser-notice').hidden = false;
+
+  function stop() {
+    generationToken++; // invalidates whatever run (if any) is still in flight
+    audio.pause();
+    audio.removeAttribute('src');
+    chunkQueue.forEach((c) => { if (c.blobUrl) URL.revokeObjectURL(c.blobUrl); });
+    chunkQueue = [];
+    currentChunkIndex = -1;
+    allChunksReceived = false;
+    waitingForChunk = true;
+    highlightWord(null);
+    wordSpans = [];
+    mode = null;
+    playBtn.disabled = true;
+    seek.value = '0';
+    playerReveal.classList.remove('revealed');
+    scriptWrap.classList.remove('revealed');
+    goBtn.disabled = false;
+    goBtn.classList.remove('loading');
+    cancelBtn.hidden = true;
+    rawAudioChunks = [];
+    audioSampleRate = null;
+    if (finalAudioBlobUrl) URL.revokeObjectURL(finalAudioBlobUrl);
+    finalAudioBlobUrl = null;
+    downloadBtn.disabled = true;
+  }
+
+  cancelBtn.addEventListener('click', () => {
+    stop();
+  });
+
+  async function go(text) {
+    text = (text || '').trim();
+    if (!text) { setStatus('Type or paste some text first.', true); return; }
+
+    stop();
+    mode = 'real';
+    const myToken = generationToken; // stop() just bumped it
+    goBtn.disabled = true;
+    goBtn.classList.add('loading');
+    cancelBtn.hidden = false;
+    setStatus('');
+
+    currentScriptText = text;
+    // Rendered into the DOM now — buildChunkWordTimings needs real spans
+    // to slice into as chunks arrive — but not shown yet. It's revealed
+    // below only once the first chunk is actually ready to play, so
+    // there's never a "script" on screen with nothing playing yet.
+    wordSpans = renderScriptWords(text);
+
+    const sentences = splitIntoSentences(text);
+    if (!sentences.length) {
+      setStatus("Couldn't find anything readable in that text.", true);
+      goBtn.disabled = false;
+      goBtn.classList.remove('loading');
+      cancelBtn.hidden = true;
+      return;
+    }
+
+    setStatus('Loading voice model (first time only can take a minute)…');
+    try {
+      const tts = await getTTS((p) => {
+        if (myToken !== generationToken) return;
+        if (p.status === 'progress' && typeof p.progress === 'number' && p.progress < 100) {
+          setStatus('Loading voice model — ' + Math.round(p.progress) + '%…');
+        }
+      });
+      if (myToken !== generationToken) return;
+
+      let wordCursor = 0;
+      for (let i = 0; i < sentences.length; i++) {
+        if (myToken !== generationToken) return;
+        setStatus('Generating audio… (' + (i + 1) + ' of ' + sentences.length + ' sentences)');
+        const sentence = sentences[i];
+        const result = await tts.generate(sentence, { voice });
+        if (myToken !== generationToken) return;
+
+        const duration = result.audio.length / result.sampling_rate;
+        const wavBuffer = encodeWav(result.audio, result.sampling_rate);
+        const blobUrl = URL.createObjectURL(new Blob([wavBuffer], { type: 'audio/wav' }));
+        rawAudioChunks.push(result.audio);
+        audioSampleRate = result.sampling_rate;
+
+        const wordCount = sentence.trim().split(/\s+/).filter(Boolean).length;
+        const spansSlice = wordSpans.slice(wordCursor, wordCursor + wordCount);
+        wordCursor += wordCount;
+
+        const isFirstChunk = chunkQueue.length === 0;
+        chunkQueue.push({ blobUrl, duration, words: buildChunkWordTimings(sentence, duration, spansSlice) });
+        renderTimeline();
+        if (waitingForChunk) playChunk(chunkQueue.length - 1);
+        if (isFirstChunk) {
+          markTried();
+          playerReveal.classList.add('revealed');
+          scriptWrap.classList.add('revealed');
+        }
+      }
+      allChunksReceived = true;
+      renderTimeline();
+      if (currentChunkIndex === -1 && chunkQueue.length) playChunk(0);
+      if (chunkQueue.length) {
+        setStatus('');
+        textInput.value = '';
+        const totalSamples = rawAudioChunks.reduce((sum, a) => sum + a.length, 0);
+        const combined = new Float32Array(totalSamples);
+        let offset = 0;
+        for (const chunk of rawAudioChunks) { combined.set(chunk, offset); offset += chunk.length; }
+        finalAudioBlobUrl = URL.createObjectURL(new Blob([encodeWav(combined, audioSampleRate)], { type: 'audio/wav' }));
+        downloadBtn.disabled = false;
+      }
+    } catch (err) {
+      if (myToken !== generationToken) return;
+      console.error(err);
+      setStatus(describeError(err), true);
+    } finally {
+      if (myToken === generationToken) {
+        goBtn.disabled = false;
+        goBtn.classList.remove('loading');
+        cancelBtn.hidden = true;
+      }
+    }
+  }
+
+  goBtn.addEventListener('click', () => go(textInput.value));
+  textInput.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(textInput.value);
+  });
+
+  // Instant, no model download — plays a real pre-recorded clip of Genie
+  // Reader reading its own pitch, inside the macOS tab's preview
+  // "screenshot" of the real app, with word-highlight timing estimated
+  // by distributing the clip's real duration across words weighted by
+  // length. Fully independent of the Web tab's reader/player state —
+  // its own audio element, its own minimal controls — since it's a
+  // taste of the native app, not the browser-side reader.
+  let macosWordSpans = [];
+  let macosActiveWordEl = null;
+  macosTryMeBtn.addEventListener('click', () => {
+    macosWordSpans = renderScriptWords(TRY_ME_TEXT, macosScriptEl);
+    macosTryMeBtn.classList.add('hidden');
+    markTried();
+    macosPlayerReveal.classList.add('revealed');
+    macosAudio.src = DEMO_AUDIO_SRC;
+    macosAudio.play().catch(() => {});
+  });
+  macosAudio.addEventListener('play', () => { macosPlayIcon.innerHTML = ICON_PAUSE; });
+  macosAudio.addEventListener('pause', () => { macosPlayIcon.innerHTML = ICON_PLAY; });
+  macosAudio.addEventListener('timeupdate', () => {
+    const dur = macosAudio.duration || 0;
+    macosTime.textContent = fmtTime(macosAudio.currentTime) + ' / ' + fmtTime(dur);
+    if (dur > 0) macosSeek.value = String(Math.round((macosAudio.currentTime / dur) * 1000));
+    const frac = dur > 0 ? macosAudio.currentTime / dur : 0;
+    let idx = 0;
+    while (idx < demoBoundaries.length - 1 && demoBoundaries[idx] < frac) idx++;
+    const span = macosWordSpans[idx] || null;
+    if (macosActiveWordEl !== span) {
+      if (macosActiveWordEl) macosActiveWordEl.classList.remove('active');
+      macosActiveWordEl = span;
+      if (macosActiveWordEl) macosActiveWordEl.classList.add('active');
+    }
+  });
+  macosPlayBtn.addEventListener('click', () => {
+    if (macosAudio.paused) macosAudio.play().catch(() => {});
+    else macosAudio.pause();
+  });
+  macosSeek.addEventListener('input', () => {
+    const dur = macosAudio.duration || 0;
+    if (dur > 0) macosAudio.currentTime = (Number(macosSeek.value) / 1000) * dur;
+  });
+
+  // --- Top-level product tabs (Web / macOS / Chrome), living where the
+  // window's traffic-light dots used to be — three products, one page,
+  // switched without scrolling. ---
+  function switchProductTab(which) {
+    for (const key in productTabs) {
+      const isActive = key === which;
+      productTabs[key].btn.classList.toggle('active', isActive);
+      productTabs[key].view.classList.toggle('active', isActive);
+    }
+    if (which === 'chrome') {
+      localStorage.setItem('genie-seen-chrome-tab', '1');
+      document.documentElement.classList.add('seen-chrome-tab');
+    }
+  }
+  productTabs.web.btn.addEventListener('click', () => switchProductTab('web'));
+  productTabs.macos.btn.addEventListener('click', () => switchProductTab('macos'));
+  productTabs.chrome.btn.addEventListener('click', () => switchProductTab('chrome'));
+
+  // --- Document tab: extracts text from an uploaded file entirely
+  // client-side (no upload, matching the "nothing leaves your device"
+  // pitch), then drops it into the Text tab for review before GO. PDF and
+  // DOCX parsing are pulled in lazily, only once actually needed, so a
+  // visitor who never touches this tab never pays for the extra ~2MB. ---
+  function switchInputTab(which) {
+    const isText = which === 'text';
+    tabTextBtn.classList.toggle('active', isText);
+    tabDocumentBtn.classList.toggle('active', !isText);
+    viewText.classList.toggle('active', isText);
+    viewDocument.classList.toggle('active', !isText);
+  }
+  tabTextBtn.addEventListener('click', () => switchInputTab('text'));
+  tabDocumentBtn.addEventListener('click', () => switchInputTab('document'));
+
+  let pdfjsLoadPromise = null;
+  function loadPdfjs() {
+    if (!pdfjsLoadPromise) {
+      pdfjsLoadPromise = import('./vendor/pdfjs/pdf.min.mjs').then((lib) => {
+        lib.GlobalWorkerOptions.workerSrc = new URL('./vendor/pdfjs/pdf.worker.min.mjs', document.baseURI).href;
+        return lib;
+      });
+    }
+    return pdfjsLoadPromise;
+  }
+
+  let mammothLoadPromise = null;
+  function loadMammoth() {
+    if (window.mammoth) return Promise.resolve(window.mammoth);
+    if (!mammothLoadPromise) {
+      mammothLoadPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'vendor/mammoth.browser.min.js';
+        s.onload = () => resolve(window.mammoth);
+        s.onerror = () => reject(new Error('Could not load the Word document reader.'));
+        document.head.appendChild(s);
+      });
+    }
+    return mammothLoadPromise;
+  }
+
+  async function extractPdfText(arrayBuffer, onProgress) {
+    const pdfjsLib = await loadPdfjs();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      if (onProgress) onProgress(i, pdf.numPages);
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(content.items.map((item) => item.str).join(' '));
+      page.cleanup();
+      // A page with heavy fonts/images can still cost real main-thread time
+      // to process even though parsing itself runs in pdf.js's worker —
+      // yielding here every page keeps a long PDF from ever reading as a
+      // frozen tab, and lets the progress text above actually repaint.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+    // pdf.js hands back one string per positioned glyph run, not per word —
+    // joining runs with a single space still leaves runs of several spaces
+    // wherever the PDF's own layout inserted extra gaps between them.
+    const text = pages.join('\n\n').replace(/[ \t]+/g, ' ').trim();
+    if (!text) throw new Error("Couldn't find any text in that PDF — it may be a scanned image.");
+    return text;
+  }
+
+  async function extractDocxText(arrayBuffer) {
+    const mammothLib = await loadMammoth();
+    const result = await mammothLib.extractRawText({ arrayBuffer });
+    const text = (result.value || '').trim();
+    if (!text) throw new Error("Couldn't find any text in that Word document.");
+    return text;
+  }
+
+  async function extractTxtText(file) {
+    const text = (await file.text()).trim();
+    if (!text) throw new Error('That file appears to be empty.');
+    return text;
+  }
+
+  async function handleDocumentFile(file) {
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    dropFname.textContent = 'Reading ' + file.name + '…';
+    try {
+      let text;
+      if (ext === '.pdf') {
+        text = await extractPdfText(await file.arrayBuffer(), (page, total) => {
+          dropFname.textContent = 'Reading page ' + page + ' of ' + total + '…';
+        });
+      }
+      else if (ext === '.docx') text = await extractDocxText(await file.arrayBuffer());
+      else if (ext === '.txt' || ext === '.md') text = await extractTxtText(file);
+      else throw new Error("Unsupported file type — try PDF, .docx, .txt, or .md.");
+      textInput.value = text;
+      dropFname.textContent = '';
+      switchInputTab('text');
+    } catch (err) {
+      console.error(err);
+      dropFname.textContent = '';
+      setStatus(err && err.message ? err.message : "Couldn't read that document.", true);
+    } finally {
+      documentInput.value = '';
+    }
+  }
+
+  dropZone.addEventListener('click', () => documentInput.click());
+  documentInput.addEventListener('change', () => {
+    if (documentInput.files[0]) handleDocumentFile(documentInput.files[0]);
+  });
+  ['dragover', 'dragenter'].forEach((evt) => {
+    dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach((evt) => {
+    dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+  });
+  dropZone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleDocumentFile(file);
+  });
+
+  // Belt-and-suspenders on top of the textarea's autofocus attribute —
+  // browsers don't reliably re-apply autofocus on every load (e.g. focus
+  // can get restored to whatever was last focused instead), leaving focus
+  // sitting on the first focusable element in the page — one of the
+  // product tabs — where a later stray Enter/Space keypress would
+  // activate it instead of doing nothing.
+  textInput.focus();
 </script>
 
 <script>
