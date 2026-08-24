@@ -76,7 +76,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&display=block" rel="stylesheet">
 <script src="coi-serviceworker.js"></script>
 <script>
   // Applied here, before paint, so a returning visitor with light mode
@@ -95,6 +95,12 @@
     // before JS later in <body> gets around to hiding it.
     if (localStorage.getItem('genie-tried-me')) document.documentElement.classList.add('tried-me');
     if (localStorage.getItem('genie-seen-chrome-tab')) document.documentElement.classList.add('seen-chrome-tab');
+    // Same reasoning again — the product tab (Web/macOS/Chrome) the
+    // visitor last had open is set here, before the "Web" view baked
+    // into the HTML would otherwise paint first and flash before the
+    // switching script at the bottom of <body> corrects it.
+    var productTab = localStorage.getItem('genie-product-tab');
+    if (productTab === 'macos' || productTab === 'chrome') document.documentElement.setAttribute('data-product-tab', productTab);
   })();
 </script>
 <style>
@@ -113,6 +119,8 @@
     --text-muted: #A79FBC;
     --engrave-hi: rgba(255, 255, 255, 0.12);
     --engrave-lo: rgba(0, 0, 0, 0.55);
+    --pink: #F0A8C4;
+    --pink-text: #4A1030;
   }
 
   html[data-theme="light"] {
@@ -130,47 +138,58 @@
     --text-muted: #473F5C;
     --engrave-hi: rgba(255, 255, 255, 0.65);
     --engrave-lo: rgba(0, 0, 0, 0.2);
+    --pink: #C2427D;
+    --pink-text: #FDF1F6;
   }
 
   * { box-sizing: border-box; }
 
-  html { background: var(--bg); scroll-behavior: smooth; }
+  html { background: var(--bg); scroll-behavior: smooth; scrollbar-gutter: stable; }
 
   body {
     margin: 0;
     min-height: 100vh;
     box-sizing: border-box;
-    background: radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow) 0%, var(--bg) 55%);
+    background: radial-gradient(ellipse 170% 100% at 50% -10%, var(--bg-glow) 0%, var(--bg) 75%);
     color: var(--text);
     font-family: ui-serif, Georgia, "Iowan Old Style", serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 72px 20px 60px;
+    padding: 56px 20px 60px;
   }
 
   .wordmark {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    margin: 0 auto 36px;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 24px;
+    position: relative;
   }
+  .wordmark-brand { display: flex; align-items: baseline; gap: 3px; }
+  .wordmark-right { display: flex; align-items: center; gap: 12px; }
   @media (max-width: 480px) {
-    .wordmark { flex-direction: column; gap: 8px; }
-    .wordmark-icon { width: 34px; height: 34px; }
-    .wordmark-text { font-size: 38px; }
+    .wordmark-icon { width: 28px; height: 28px; }
+    .wordmark-text { font-size: 28px; }
+    .wordmark { flex-wrap: wrap; row-gap: 14px; }
+    .wordmark-right { width: 100%; justify-content: space-between; }
+    .wordmark .product-tabs { gap: 6px; }
+    .wordmark .product-tabs button { padding: 8px 12px; }
+    .wordmark .menu-toggle { width: 32px; height: 32px; flex-shrink: 0; }
   }
-  .wordmark-icon { width: 40px; height: 40px; flex-shrink: 0; display: block; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
+  .wordmark-icon { width: 30px; height: 30px; flex-shrink: 0; display: block; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
   html[data-theme="light"] .wordmark-icon { filter: drop-shadow(0 1px 0 rgba(255,255,255,0.7)) drop-shadow(0 -1px 0 rgba(0,0,0,0.12)); }
   .wordmark-icon polygon { fill: var(--bg); }
   .wordmark-text {
-    font-size: 52px;
+    font-size: 36px;
     font-weight: 400;
     letter-spacing: 0.01em;
     margin: 0;
     color: var(--bg);
     text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 0 rgba(0,0,0,0.4);
+    white-space: nowrap;
   }
   html[data-theme="light"] .wordmark-text { text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 -1px 0 rgba(0,0,0,0.12); }
 
@@ -207,10 +226,6 @@
   /* --- Mockup of the actual app UI --- */
   .mock-wrap { width: 100%; max-width: 700px; position: relative; }
   .mock-window {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    overflow: hidden;
     user-select: none;
   }
   .mock-titlebar {
@@ -228,15 +243,25 @@
   .mock-dot-red { background: #ED6A5E; }
   .mock-dot-yellow { background: #F4BF4F; }
   .mock-dot-green { background: #61C454; }
-  .product-tabs { display: flex; align-items: center; gap: 6px; }
+  .product-tabs { display: flex; align-items: center; gap: 10px; }
   .product-tabs button {
-    font-family: ui-monospace, monospace; font-size: 16px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: ui-monospace, monospace; font-size: 14px; font-weight: 700;
     letter-spacing: 0.03em; color: var(--text-muted);
-    background: none; border: none; border-radius: 7px;
-    padding: 7px 14px; cursor: pointer; transition: color 0.15s, background 0.15s;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 18px; cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
   }
-  .product-tabs button:hover { color: var(--text); }
-  .product-tabs button.active { background: var(--text-muted); color: var(--panel-2); }
+  .product-tabs button:hover { color: var(--pink); border-color: var(--pink); }
+  .product-tabs button.active { background: var(--pink); color: var(--pink-text); border-color: var(--pink); }
+  /* Pre-paint restore of the last-viewed product tab — see the inline
+     script in <head>. #id selectors here outrank .product-tabs
+     button.active / .product-view.active so this wins before the
+     switching script at the bottom of <body> even runs. */
+  html[data-product-tab="macos"] #tab-product-web,
+  html[data-product-tab="chrome"] #tab-product-web { background: var(--panel); color: var(--text-muted); border-color: var(--line); }
+  html[data-product-tab="macos"] #tab-product-macos,
+  html[data-product-tab="chrome"] #tab-product-chrome { background: var(--pink); color: var(--pink-text); border-color: var(--pink); }
   .new-badge {
     display: inline-block;
     margin-left: 5px;
@@ -246,20 +271,22 @@
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: #F0A8C4;
-    color: #4A1030;
+    background: var(--pink);
+    color: var(--pink-text);
     vertical-align: 1px;
   }
   html.seen-chrome-tab .new-badge { display: none; }
 
   /* --- Voice menu, styled to match the macOS app's own app-menu-panel --- */
   .menu-toggle {
-    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel-2);
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel);
     color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    flex-shrink: 0;
     transition: color 0.15s, border-color 0.15s;
   }
-  .menu-toggle:hover { color: var(--amber); border-color: var(--amber-dim); }
-  .menu-toggle svg { width: 15px; height: 15px; }
+  .menu-toggle:hover { color: var(--pink); border-color: var(--pink); }
+  .menu-toggle[aria-expanded="true"] { background: var(--pink); color: var(--pink-text); border-color: var(--pink); }
+  .menu-toggle svg { width: 19px; height: 19px; }
   .app-menu-panel {
     position: absolute; top: calc(100% + 6px); right: 8px;
     width: 240px;
@@ -295,18 +322,23 @@
     position: relative; width: 34px; height: 19px; background: var(--line);
     border-radius: 10px; flex-shrink: 0; transition: background 0.2s ease;
   }
-  .theme-switch.on { background: var(--amber-solid); }
+  .theme-switch.on { background: var(--pink); }
   .theme-switch-knob {
     position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
     background: var(--panel); border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     transition: transform 0.2s ease;
   }
   .theme-switch.on .theme-switch-knob { transform: translateX(15px); }
+  .app-menu-links {
+    padding: 4px 8px 2px; text-align: center; font-size: 13px; color: var(--text-muted);
+  }
+  .app-menu-links a { color: var(--text-muted); }
+  .app-menu-links a:hover { color: var(--amber); }
   .app-menu-version {
     margin-top: 2px; padding: 8px; font-family: ui-monospace, monospace; font-size: 10.5px;
     letter-spacing: 0.03em; color: var(--text-muted); text-align: center;
   }
-  .mock-window-content { padding: 26px 22px 14px; }
+  .mock-window-content { padding: 22px 0 14px; }
   .mock-panel {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -315,6 +347,10 @@
   }
   .product-view { display: none; }
   .product-view.active { display: block; }
+  html[data-product-tab="macos"] #view-product-web,
+  html[data-product-tab="chrome"] #view-product-web { display: none; }
+  html[data-product-tab="macos"] #view-product-macos { display: block; }
+  html[data-product-tab="chrome"] #view-product-chrome { display: block; }
   .mock-panel.product-panel { text-align: center; }
   .product-panel .features { max-width: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 
@@ -364,7 +400,7 @@
   .mock-tabs button.active { background: var(--text-muted); color: var(--panel-2); font-weight: 600; }
   .mock-tabs button:disabled { cursor: default; opacity: 0.55; }
   .mock-tabs button .unsupported { display: block; font-size: 9.5px; letter-spacing: 0.06em; margin-top: 1px; }
-  .mock-tabs button .unsupported.beta { color: var(--amber); text-transform: uppercase; }
+  .mock-tabs button .unsupported.beta { color: var(--pink); text-transform: uppercase; }
   .mock-tabs button.active .unsupported.beta { color: inherit; opacity: 0.7; }
   .input-view { display: none; }
   .input-view.active { display: block; }
@@ -413,15 +449,21 @@
     border-radius: 8px;
     padding: 10px 12px;
     min-height: 129px;
-    font-family: inherit;
-    font-size: 16px;
+    font-family: ui-serif, Georgia, serif;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    line-height: 1.7;
     color: var(--text);
     outline: none;
     resize: vertical;
     margin-bottom: 16px;
   }
-  .mock-textarea:focus { border-color: var(--amber-dim); }
+  .mock-textarea:focus {
+    border-color: var(--amber-dim);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--amber-solid) 18%, transparent);
+  }
   .mock-textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+  .mock-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
   .demo-status {
     font-family: ui-monospace, monospace;
     font-size: 11px;
@@ -440,20 +482,6 @@
     padding: 6px 10px;
     margin-top: 10px;
   }
-  .cancel-btn {
-    font-family: ui-monospace, monospace;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    color: var(--text-muted);
-    background: none;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 11px 18px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .cancel-btn:hover { border-color: #E29090; color: #E29090; }
 
   .mock-divider-line { height: 1px; background: var(--line); margin: 18px 0; }
 
@@ -541,8 +569,8 @@
     position: absolute;
     left: 0;
     top: -42px;
-    background: #F0A8C4;
-    color: #4A1030;
+    background: var(--pink);
+    color: var(--pink-text);
     font-family: ui-monospace, monospace;
     font-size: 14px;
     font-weight: 700;
@@ -564,12 +592,10 @@
   @media (prefers-reduced-motion: reduce) { .try-me-badge { animation: none; } }
 
   .mock-footer {
-    margin-top: 14px;
     font-family: 'Sacramento', cursive;
     font-size: 19px;
     color: var(--text-muted);
     text-shadow: 0 1px 0 var(--engrave-hi), 0 -1px 1px var(--engrave-lo);
-    text-align: center;
   }
 
   .features {
@@ -653,42 +679,47 @@
     border-radius: 4px;
     vertical-align: middle;
   }
-  .pro-badge.free { color: var(--green); border-color: var(--green-dim); }
+  .pro-badge.free { color: var(--pink); border-color: var(--pink); }
   .install-note code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 12px; color: var(--text); }
 
   footer {
     width: 100%;
     max-width: 700px;
-    margin-top: auto;
+    margin-top: 28px;
     padding-top: 20px;
-    border-top: 1px solid var(--line);
     font-size: 12px;
     color: var(--text-muted);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
-  footer a { color: var(--text-muted); }
-  footer a:hover { color: var(--amber); }
 </style>
 </head>
 <body>
 
   <div class="wordmark">
-    <svg class="wordmark-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="22,2 22,5 20,9 16,13 11,17 8,20 4,23 1,23 3,20 5,17 9,13 13,9 18,5"/><polygon points="22,14 22,23 11,23"/></svg>
-    <h1 class="wordmark-text">Genie Reader</h1>
-  </div>
-
-  <div class="mock-wrap">
-    <div class="mock-window">
-      <div class="mock-titlebar">
-        <div class="product-tabs">
-          <button type="button" class="active" id="tab-product-web">Web</button>
-          <button type="button" id="tab-product-macos">macOS</button>
-          <button type="button" id="tab-product-chrome">Chrome<span class="new-badge">New</span></button>
-        </div>
-        <button class="menu-toggle" id="menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Voice settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/></svg>
+    <div class="wordmark-brand">
+      <svg class="wordmark-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="22,2 22,5 20,9 16,13 11,17 8,20 4,23 1,23 3,20 5,17 9,13 13,9 18,5"/><polygon points="22,14 22,23 11,23"/></svg>
+      <h1 class="wordmark-text">Genie Reader</h1>
+    </div>
+    <div class="wordmark-right">
+      <div class="product-tabs">
+        <button type="button" class="active" id="tab-product-web">
+          Web
         </button>
-        <div class="app-menu-panel" id="app-menu-panel" hidden>
+        <button type="button" id="tab-product-macos">
+          macOS
+        </button>
+        <button type="button" id="tab-product-chrome">
+          Chrome
+        </button>
+      </div>
+    <button class="menu-toggle" id="menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Voice settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/></svg>
+    </button>
+    <div class="app-menu-panel" id="app-menu-panel" hidden>
           <button class="app-menu-row theme-row" id="menu-theme-btn" type="button">
             <span id="menu-theme-icon">&#9789;</span>
             <span id="menu-theme-label">Theme</span>
@@ -713,9 +744,14 @@
             <span class="voice-row-check">&#10003;</span>
           </div>
           <div class="app-menu-divider"></div>
+          <div class="app-menu-links"><a href="privacy.html">Privacy</a> · <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a></div>
           <div class="app-menu-version">Genie Reader v2.0.0</div>
         </div>
-      </div>
+    </div>
+  </div>
+
+  <div class="mock-wrap">
+    <div class="mock-window">
       <div class="mock-window-content">
         <div class="product-view active" id="view-product-web">
         <div class="mock-panel">
@@ -724,7 +760,7 @@
             <button type="button" id="tab-document">Document<span class="unsupported beta">beta</span></button>
           </div>
           <div class="input-view active" id="view-text">
-            <textarea class="mock-textarea" id="text-input" placeholder="Paste any text you'd like read aloud…" autofocus></textarea>
+            <textarea class="mock-textarea" id="text-input" placeholder="Paste any text you'd like read aloud…"></textarea>
           </div>
           <div class="input-view" id="view-document">
             <div class="drop" id="drop-zone">
@@ -737,7 +773,6 @@
           <div class="browser-notice" id="browser-notice" hidden>Not compatible with Safari yet — please try Chrome or Edge.</div>
           <div class="mock-go-wrap">
             <div class="demo-status" id="demo-status" style="margin:0; flex:1; text-align:left;"></div>
-            <button class="cancel-btn" id="cancel-btn" type="button" hidden>Cancel</button>
             <button class="mock-go" id="go-btn" type="button" aria-label="Read"><span class="go-content">Read</span><span class="go-spinner"></span></button>
           </div>
 
@@ -785,7 +820,7 @@
         <div class="product-view" id="view-product-macos">
         <div class="mock-panel product-panel">
   <h2 class="extension-promo-title">Genie Reader for macOS</h2>
-  <p class="extension-promo-desc">Where the real magic happens.</p>
+  <p class="extension-promo-desc">Unlimited wishes — limited only by your RAM.</p>
   <div class="macos-promo-window">
     <div class="mock-titlebar">
       <span class="mock-titlebar-dots">
@@ -887,13 +922,12 @@
     <div class="download-meta">Available <span class="pro-badge free">FREE</span> on the Chrome Web Store</div>
         </div>
         </div>
-        <div class="mock-footer">Private by design</div>
       </div>
     </div>
   </div>
 
   <footer>
-    <a href="privacy.html">Privacy</a> · <a href="https://github.com/mazen-kasser/genie-reader/issues/new">Send feedback</a>
+    <span class="mock-footer">Private by design</span>
   </footer>
 
 <script type="module">
@@ -911,19 +945,10 @@
 
   const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
   let voice = localStorage.getItem('genie-voice') || "af_heart";
-  // Displayed with the correct capitalization ("RAM") for the on-screen
-  // script — the actual demo-reading.wav clip was generated from this
-  // same text with "ram" lowercased instead, since Kokoro reads an
-  // all-caps word as an acronym to spell out letter-by-letter rather
-  // than as the word it actually is. Word-highlight timing is estimated
-  // from each word's letter count, which is identical either way, so the
-  // display text can differ from what was actually spoken without
-  // desyncing the highlighting.
-  const TRY_ME_TEXT = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your device; nothing is sent to the cloud. Unlimited wishes — limited only by your RAM.";
+  const TRY_ME_TEXT = "Paste an article, drop in a document, or type text — Genie Reader rewrites it for speech and reads it back in one of 4 voices. Everything runs on your device; nothing is sent to the cloud.";
 
   const textInput = document.getElementById('text-input');
   const goBtn = document.getElementById('go-btn');
-  const cancelBtn = document.getElementById('cancel-btn');
   const statusEl = document.getElementById('demo-status');
   const playerReveal = document.getElementById('player-reveal');
   const audio = document.getElementById('demo-audio');
@@ -1126,13 +1151,30 @@
   // Kokoro gives no per-word timestamps in the browser — each word gets a
   // slice of its sentence's real generated duration, proportional to its
   // character length. Same estimate the extension and the macOS app use.
+  //
+  // Pure proportional-by-length gives short words (e.g. "fox" next to
+  // "riverbank") windows narrower than the browser's native `timeupdate`
+  // firing interval (commonly ~200-250ms), so the highlight silently
+  // skips over them — verified directly: at 120ms sampling resolution,
+  // "fox" never lit up at all between "brown" and "jumps". A flat floor
+  // + global rescale isn't enough on its own — rescaling to make the
+  // total add back up to `duration` shrinks the floored words right back
+  // down with everything else. Floored words are excluded from the
+  // rescale entirely; only the naturally-long words absorb the
+  // difference, so the floor actually holds.
   function buildChunkWordTimings(chunkText, duration, spansSlice) {
     const parts = chunkText.trim().split(/\s+/).filter(Boolean);
     const totalChars = parts.reduce((a, w) => a + w.length, 0) || 1;
+    const MIN_WORD_DUR = Math.min(0.22, duration / parts.length);
+    const raw = parts.map((w) => duration * (w.length / totalChars));
+    const flooredTime = raw.reduce((a, d) => a + (d < MIN_WORD_DUR ? MIN_WORD_DUR : 0), 0);
+    const naturalTotal = raw.reduce((a, d) => a + (d < MIN_WORD_DUR ? 0 : d), 0) || 1;
+    const remaining = Math.max(duration - flooredTime, 0);
+    const scale = remaining / naturalTotal;
     const words = [];
     let cursor = 0;
     parts.forEach((word, i) => {
-      const wDur = duration * (word.length / totalChars);
+      const wDur = raw[i] < MIN_WORD_DUR ? MIN_WORD_DUR : raw[i] * scale;
       words.push({ start: cursor, end: cursor + wDur, span: spansSlice[i] || null });
       cursor += wDur;
     });
@@ -1220,14 +1262,46 @@
     if (audio.paused) audio.play().catch(() => setStatus("Couldn't start playback — click ▶ again.", true));
     else audio.pause();
   });
+  // Word highlighting runs off its own requestAnimationFrame loop, not
+  // the audio element's native `timeupdate` event — browsers throttle
+  // timeupdate heavily (verified directly: gaps of 500ms+ between
+  // firings in practice, not the ~250ms the spec's guideline suggests),
+  // so short words' windows were silently getting skipped entirely
+  // between one firing and the next. rAF runs at the display's real
+  // refresh rate, so no window short of a single frame can be missed.
+  let highlightRafId = null;
+  function highlightTick() {
+    if (mode === 'demo') {
+      const dur = audio.duration || 0;
+      const frac = dur > 0 ? audio.currentTime / dur : 0;
+      let idx = 0;
+      while (idx < demoBoundaries.length - 1 && demoBoundaries[idx] < frac) idx++;
+      highlightWord(wordSpans[idx] || null);
+    } else {
+      const chunk = chunkQueue[currentChunkIndex];
+      if (chunk) {
+        const t = audio.currentTime;
+        const w = chunk.words.find((w) => t >= w.start && t < w.end);
+        highlightWord(w ? w.span : null);
+      }
+    }
+    highlightRafId = requestAnimationFrame(highlightTick);
+  }
+  function stopHighlightLoop() {
+    if (highlightRafId !== null) { cancelAnimationFrame(highlightRafId); highlightRafId = null; }
+  }
+
   audio.addEventListener('play', () => {
     playIcon.innerHTML = ICON_PAUSE;
     // Clears a stale "couldn't start playback" from an earlier attempt
     // once a later one actually succeeds.
     if (mode) setStatus('');
+    stopHighlightLoop();
+    highlightRafId = requestAnimationFrame(highlightTick);
   });
-  audio.addEventListener('pause', () => { playIcon.innerHTML = ICON_PLAY; });
+  audio.addEventListener('pause', () => { playIcon.innerHTML = ICON_PLAY; stopHighlightLoop(); });
   audio.addEventListener('ended', () => {
+    stopHighlightLoop();
     highlightWord(null);
     if (mode === 'demo') { seek.value = '0'; return; }
     advanceOrWait();
@@ -1237,18 +1311,9 @@
       const dur = audio.duration || 0;
       timeEl.textContent = fmtTime(audio.currentTime) + ' / ' + fmtTime(dur);
       if (dur > 0) seek.value = String(Math.round((audio.currentTime / dur) * 1000));
-      const frac = dur > 0 ? audio.currentTime / dur : 0;
-      let idx = 0;
-      while (idx < demoBoundaries.length - 1 && demoBoundaries[idx] < frac) idx++;
-      highlightWord(wordSpans[idx] || null);
       return;
     }
     renderTimeline();
-    const chunk = chunkQueue[currentChunkIndex];
-    if (!chunk) return;
-    const t = audio.currentTime;
-    const w = chunk.words.find((w) => t >= w.start && t < w.end);
-    highlightWord(w ? w.span : null);
   });
 
   // Seeking is only allowed within what's actually been generated so far
@@ -1350,6 +1415,7 @@
 
   function stop() {
     generationToken++; // invalidates whatever run (if any) is still in flight
+    setStatus('');
     audio.pause();
     audio.removeAttribute('src');
     chunkQueue.forEach((c) => { if (c.blobUrl) URL.revokeObjectURL(c.blobUrl); });
@@ -1366,17 +1432,13 @@
     scriptWrap.classList.remove('revealed');
     goBtn.disabled = false;
     goBtn.classList.remove('loading');
-    cancelBtn.hidden = true;
+    textInput.disabled = false;
     rawAudioChunks = [];
     audioSampleRate = null;
     if (finalAudioBlobUrl) URL.revokeObjectURL(finalAudioBlobUrl);
     finalAudioBlobUrl = null;
     downloadBtn.disabled = true;
   }
-
-  cancelBtn.addEventListener('click', () => {
-    stop();
-  });
 
   async function go(text) {
     text = (text || '').trim();
@@ -1387,8 +1449,22 @@
     const myToken = generationToken; // stop() just bumped it
     goBtn.disabled = true;
     goBtn.classList.add('loading');
-    cancelBtn.hidden = false;
+    // Edits during generation wouldn't do anything anyway — go() already
+    // captured its own snapshot of the text — so disable+dim it rather
+    // than leave it looking live and editable while it isn't.
+    textInput.disabled = true;
     setStatus('');
+
+    // Yield two paint frames here so the spinner is actually on screen
+    // before anything below can block the main thread. On a cold start,
+    // the model-download awaits already give the browser plenty of
+    // chances to paint — but once the model is cached from an earlier
+    // run in this session, getTTS() resolves an already-settled promise
+    // and generate() (synchronous-feeling WASM inference) can start on
+    // the very next microtask, with no real gap for a paint to land. Without
+    // this, that second-run-onward click can go straight from click to
+    // "frozen" with the spinner never actually rendered.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     currentScriptText = text;
     // Rendered into the DOM now — buildChunkWordTimings needs real spans
@@ -1402,7 +1478,7 @@
       setStatus("Couldn't find anything readable in that text.", true);
       goBtn.disabled = false;
       goBtn.classList.remove('loading');
-      cancelBtn.hidden = true;
+      textInput.disabled = false;
       return;
     }
 
@@ -1465,7 +1541,7 @@
       if (myToken === generationToken) {
         goBtn.disabled = false;
         goBtn.classList.remove('loading');
-        cancelBtn.hidden = true;
+        textInput.disabled = false;
       }
     }
   }
@@ -1474,6 +1550,40 @@
   textInput.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(textInput.value);
   });
+
+  // A typewriter cycle through the same facts llms.txt tells an AI
+  // crawler, playing out in the placeholder for a first-time visitor —
+  // stops for good the moment they actually start typing (not on the
+  // page's own auto-focus below, which would otherwise kill it instantly).
+  const TYPEWRITER_DEFAULT = textInput.placeholder;
+  const TYPEWRITER_LINES = [
+    'Local-first text-to-speech — nothing is ever uploaded…',
+    'Runs entirely on-device via Kokoro. No account, no server round-trip…',
+    'Free on Web, macOS & Chrome…',
+  ];
+  let twStopped = false;
+  let twTimer = null;
+  function typewriterTick(line, i, deleting) {
+    if (twStopped) return;
+    textInput.placeholder = line.slice(0, i);
+    if (!deleting && i === line.length) {
+      twTimer = setTimeout(() => typewriterTick(line, i, true), 1600);
+    } else if (deleting && i === 0) {
+      const next = (TYPEWRITER_LINES.indexOf(line) + 1) % TYPEWRITER_LINES.length;
+      twTimer = setTimeout(() => typewriterTick(TYPEWRITER_LINES[next], 0, false), 300);
+    } else {
+      twTimer = setTimeout(() => typewriterTick(line, i + (deleting ? -1 : 1), deleting), deleting ? 26 : 62);
+    }
+  }
+  function stopTypewriter() {
+    if (twStopped) return;
+    twStopped = true;
+    clearTimeout(twTimer);
+    textInput.placeholder = TYPEWRITER_DEFAULT;
+  }
+  textInput.addEventListener('input', stopTypewriter);
+  textInput.addEventListener('keydown', stopTypewriter);
+  if (!textInput.value) setTimeout(() => typewriterTick(TYPEWRITER_LINES[0], 0, false), 1000);
 
   // Instant, no model download — plays a real pre-recorded clip of Genie
   // Reader reading its own pitch, inside the macOS tab's preview
@@ -1526,6 +1636,14 @@
       productTabs[key].btn.classList.toggle('active', isActive);
       productTabs[key].view.classList.toggle('active', isActive);
     }
+    localStorage.setItem('genie-product-tab', which);
+    // Keep the pre-paint attribute (see the head script + its CSS
+    // overrides above) in sync with reality — otherwise switching tabs
+    // live leaves the *previous* tab's override attribute stuck on
+    // <html>, so both the stale tab and the newly-clicked one render as
+    // "selected" at once.
+    if (which === 'web') document.documentElement.removeAttribute('data-product-tab');
+    else document.documentElement.setAttribute('data-product-tab', which);
     if (which === 'chrome') {
       localStorage.setItem('genie-seen-chrome-tab', '1');
       document.documentElement.classList.add('seen-chrome-tab');
@@ -1534,6 +1652,11 @@
   productTabs.web.btn.addEventListener('click', () => switchProductTab('web'));
   productTabs.macos.btn.addEventListener('click', () => switchProductTab('macos'));
   productTabs.chrome.btn.addEventListener('click', () => switchProductTab('chrome'));
+  // Reconcile the real .active classes with whatever the pre-paint
+  // head script already displayed (see html[data-product-tab] CSS above)
+  // — a no-op for 'web' since that's already the HTML's baked-in default.
+  const savedProductTab = localStorage.getItem('genie-product-tab');
+  if (savedProductTab && savedProductTab !== 'web' && productTabs[savedProductTab]) switchProductTab(savedProductTab);
 
   // --- Document tab: extracts text from an uploaded file entirely
   // client-side (no upload, matching the "nothing leaves your device"
@@ -1654,13 +1777,6 @@
     if (file) handleDocumentFile(file);
   });
 
-  // Belt-and-suspenders on top of the textarea's autofocus attribute —
-  // browsers don't reliably re-apply autofocus on every load (e.g. focus
-  // can get restored to whatever was last focused instead), leaving focus
-  // sitting on the first focusable element in the page — one of the
-  // product tabs — where a later stray Enter/Space keypress would
-  // activate it instead of doing nothing.
-  textInput.focus();
 </script>
 
 <script>
