@@ -1,0 +1,22 @@
+# Genie Reader
+
+> Genie Reader is a free, local-first text-to-speech tool that turns articles, documents, and pasted text into natural-sounding spoken audio entirely on-device — nothing is uploaded or sent to a server.
+
+Genie Reader is available in three forms, all built on the same on-device Kokoro text-to-speech model:
+
+- **Web app** — https://geniereader.com/ — paste text or upload a document, no install required, runs in the browser.
+- **macOS app** — native app for reading a URL, pasted text, PDFs, or Office documents aloud. Free download: https://github.com/mazen-kasser/genie-reader/releases
+- **Chrome extension** — reads any webpage aloud from the browser toolbar. Free on the Chrome Web Store: https://chromewebstore.google.com/detail/genie-reader/fehminldoajajhhmefjllfbnndngogfg
+
+## Key facts
+
+- Text-to-speech runs on-device using the Kokoro model — no account, no server round-trip, no data collection.
+- Free to use on all three platforms.
+- The macOS app also offers a Pro tier with AI-assisted rewriting (Natural/Summary modes), powered by a local Ollama installation.
+- Reading history (audio + script) is saved locally on the user's own device, not in the cloud.
+
+## Links
+
+- Privacy policy: https://geniereader.com/privacy.html
+- Source and releases: https://github.com/mazen-kasser/genie-reader
+- Feedback / issues: https://github.com/mazen-kasser/genie-reader/issues/new

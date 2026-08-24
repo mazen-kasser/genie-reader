@@ -5,7 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genie Reader — local, private text-to-speech for macOS</title>
 <meta name="description" content="Genie Reader turns articles, documents, and pasted text into natural-sounding spoken audio, entirely on your Mac. Free download for macOS.">
+<link rel="canonical" href="https://geniereader.com/">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iIzJBMjUzNiIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2LDE2KSBzY2FsZSg0KSIgZmlsbD0iI0U4QjU4NiI+PHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPjwvZz48L3N2Zz4=">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Genie Reader">
+<meta property="og:title" content="Genie Reader — local, private text-to-speech for macOS">
+<meta property="og:description" content="Genie Reader turns articles, documents, and pasted text into natural-sounding spoken audio, entirely on your Mac. Free download for macOS.">
+<meta property="og:url" content="https://geniereader.com/">
+<meta property="og:image" content="https://geniereader.com/icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Genie Reader — local, private text-to-speech for macOS">
+<meta name="twitter:description" content="Genie Reader turns articles, documents, and pasted text into natural-sounding spoken audio, entirely on your Mac. Free download for macOS.">
+<meta name="twitter:image" content="https://geniereader.com/icon.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://geniereader.com/#website",
+      "name": "Genie Reader",
+      "url": "https://geniereader.com/",
+      "description": "Genie Reader turns articles, documents, and pasted text into natural-sounding spoken audio, entirely on-device.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://geniereader.com/#web-app",
+      "name": "Genie Reader (Web)",
+      "url": "https://geniereader.com/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any (runs in browser)",
+      "description": "Paste text or upload a document and have it read aloud directly in your browser, using on-device text-to-speech.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "isPartOf": { "@id": "https://geniereader.com/#website" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://geniereader.com/#macos-app",
+      "name": "Genie Reader for macOS",
+      "url": "https://geniereader.com/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "macOS",
+      "softwareVersion": "2.0.0",
+      "downloadUrl": "https://github.com/mazen-kasser/genie-reader/releases",
+      "description": "Native macOS app that reads URLs, pasted text, PDFs, and Office documents aloud using the on-device Kokoro text-to-speech model — nothing leaves your Mac.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "image": "https://geniereader.com/icon.png",
+      "isPartOf": { "@id": "https://geniereader.com/#website" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://geniereader.com/#chrome-extension",
+      "name": "Genie Reader for Chrome",
+      "url": "https://chromewebstore.google.com/detail/genie-reader/fehminldoajajhhmefjllfbnndngogfg",
+      "applicationCategory": "BrowserApplication",
+      "operatingSystem": "Chrome",
+      "softwareVersion": "2.0.0",
+      "downloadUrl": "https://chromewebstore.google.com/detail/genie-reader/fehminldoajajhhmefjllfbnndngogfg",
+      "description": "Chrome extension that reads any webpage aloud using the on-device Kokoro text-to-speech model — no server, no account, nothing leaves your machine.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "screenshot": "https://geniereader.com/extension-screenshot-popup.png",
+      "isPartOf": { "@id": "https://geniereader.com/#website" }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
@@ -498,7 +566,7 @@
   .mock-footer {
     margin-top: 14px;
     font-family: 'Sacramento', cursive;
-    font-size: 16px;
+    font-size: 19px;
     color: var(--text-muted);
     text-shadow: 0 1px 0 var(--engrave-hi), 0 -1px 1px var(--engrave-lo);
     text-align: center;
