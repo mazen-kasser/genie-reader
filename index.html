@@ -177,6 +177,7 @@
     .wordmark-right { width: 100%; justify-content: space-between; }
     .wordmark .product-tabs { gap: 6px; }
     .wordmark .product-tabs button { padding: 8px 12px; }
+    .tab-hint { display: none; }
     .wordmark .menu-toggle { width: 32px; height: 32px; flex-shrink: 0; }
   }
   .wordmark-icon { width: 30px; height: 30px; flex-shrink: 0; display: block; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08)) drop-shadow(0 -1px 0 rgba(0,0,0,0.4)); }
@@ -198,18 +199,18 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: #1d1815;
-    border: 1px solid var(--line);
-    color: #EDE7F5;
+    background: var(--amber-solid);
+    border: 1px solid transparent;
+    color: #211603;
     font-family: ui-serif, Georgia, serif;
     font-size: 17px;
     font-weight: 700;
     text-decoration: none;
     padding: 15px 30px;
     border-radius: 11px;
-    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    transition: opacity 0.15s, transform 0.1s;
   }
-  .download-btn:hover { background: #262019; border-color: var(--amber-dim); }
+  .download-btn:hover { opacity: 0.9; }
   .download-btn:active { transform: scale(0.98); }
   .download-btn svg { width: 18px; height: 18px; }
 
@@ -254,6 +255,7 @@
   }
   .product-tabs button:hover { color: var(--pink); border-color: var(--pink); }
   .product-tabs button.active { background: var(--pink); color: var(--pink-text); border-color: var(--pink); }
+  .tab-hint { font-size: 10px; font-weight: 500; opacity: 0.7; letter-spacing: 0.01em; }
   /* Pre-paint restore of the last-viewed product tab — see the inline
      script in <head>. #id selectors here outrank .product-tabs
      button.active / .product-view.active so this wins before the
@@ -710,10 +712,10 @@
           Web
         </button>
         <button type="button" id="tab-product-macos">
-          macOS
+          macOS <span class="tab-hint">(.dmg)</span>
         </button>
         <button type="button" id="tab-product-chrome">
-          Chrome
+          Chrome <span class="tab-hint">(extension)</span>
         </button>
       </div>
     <button class="menu-toggle" id="menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Voice settings">
