@@ -98,8 +98,11 @@
     // Same reasoning again — the product tab (Web/macOS/Chrome) the
     // visitor last had open is set here, before the "Web" view baked
     // into the HTML would otherwise paint first and flash before the
-    // switching script at the bottom of <body> corrects it.
-    var productTab = localStorage.getItem('genie-product-tab');
+    // switching script at the bottom of <body> corrects it. A shareable
+    // link's hash (e.g. geniereader.com/#chrome) wins over the saved
+    // localStorage tab, so a pasted link always opens on the tab it names.
+    var hashTab = (location.hash || '').slice(1);
+    var productTab = (hashTab === 'macos' || hashTab === 'chrome') ? hashTab : localStorage.getItem('genie-product-tab');
     if (productTab === 'macos' || productTab === 'chrome') document.documentElement.setAttribute('data-product-tab', productTab);
   })();
 </script>
@@ -1650,14 +1653,25 @@
       localStorage.setItem('genie-seen-chrome-tab', '1');
       document.documentElement.classList.add('seen-chrome-tab');
     }
+    // Keep the URL hash in sync so the current tab is always a shareable
+    // link (geniereader.com/#chrome, /#macos) — replaceState so clicking
+    // between tabs doesn't spam browser history.
+    const hash = which === 'web' ? '' : '#' + which;
+    if ((location.hash || '') !== hash) {
+      history.replaceState(null, '', location.pathname + location.search + hash);
+    }
   }
   productTabs.web.btn.addEventListener('click', () => switchProductTab('web'));
   productTabs.macos.btn.addEventListener('click', () => switchProductTab('macos'));
   productTabs.chrome.btn.addEventListener('click', () => switchProductTab('chrome'));
-  // Reconcile the real .active classes with whatever the pre-paint
-  // head script already displayed (see html[data-product-tab] CSS above)
-  // — a no-op for 'web' since that's already the HTML's baked-in default.
-  const savedProductTab = localStorage.getItem('genie-product-tab');
+  // Reconcile the real .active classes with whatever the pre-paint head
+  // script already displayed (see html[data-product-tab] CSS above) — a
+  // no-op for 'web' since that's already the HTML's baked-in default. A
+  // link's hash wins over the saved tab, same priority as the head script.
+  const hashProductTab = location.hash.slice(1);
+  const savedProductTab = (hashProductTab === 'macos' || hashProductTab === 'chrome')
+    ? hashProductTab
+    : localStorage.getItem('genie-product-tab');
   if (savedProductTab && savedProductTab !== 'web' && productTabs[savedProductTab]) switchProductTab(savedProductTab);
 
   // --- Document tab: extracts text from an uploaded file entirely
